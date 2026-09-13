@@ -209,7 +209,8 @@
   }
   .field .hint { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); font-weight: 400; }
 
-  input[type="date"], select {
+  input[type="number"] { font-family: var(--mono); font-size: 13px; }
+  input[type="date"], input[type="number"], select {
     width: 100%; font-family: var(--body); font-size: 14px; color: var(--ink);
     background: var(--surface-2); border: 1px solid var(--rule);
     border-radius: 3px; padding: 8px 9px; appearance: none;
@@ -599,6 +600,28 @@
   .legal-body p { margin: 0 0 8px; color: var(--ink-2); }
   .legal-body strong { color: var(--ink); }
 
+  /* ---------- nutrition ---------- */
+  details.nutri { margin-top: 12px; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface-2); padding: 8px 12px; }
+  details.nutri summary { cursor: pointer; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2); }
+  details.nutri summary::marker { color: var(--accent); }
+  .block.nu { background: var(--surface); }
+  .nu-hint { font-size: 12px; color: var(--ink-3); margin: 10px 0 2px; }
+  .nutri-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 4px; padding: 16px 18px 14px; box-shadow: var(--shadow); }
+  .nutri-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; margin-bottom: 14px; }
+  .nutri-grid .fig .v { font-size: 22px; }
+  .nutri-grid .fig .s { display: block; font-size: 11px; color: var(--ink-3); margin-top: 4px; }
+  .nutri-tips { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13.5px; color: var(--ink-2); }
+  .nutri-tips li { padding-left: 14px; position: relative; }
+  .nutri-tips li::before { content: ""; position: absolute; left: 0; top: .62em; width: 6px; height: 2px; background: var(--accent); }
+  .nutri-steps { display: grid; gap: 10px; }
+  .nutri-step { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; }
+  .nutri-step .t { font-family: var(--display); font-variation-settings: "wdth" 100, "wght" 750; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px; }
+  .nutri-step ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13.5px; color: var(--ink-2); }
+  .nutri-step li { padding-left: 13px; position: relative; }
+  .nutri-step li::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 1px; background: var(--ink-3); }
+  .nutri-foot { font-size: 11.5px; color: var(--ink-3); margin: 14px 0 0; padding-top: 10px; border-top: 1px solid var(--rule-soft); }
+  @media (max-width: 700px) { .nutri-grid { grid-template-columns: 1fr 1fr; } }
+
   /* ---------- barre d'onglets (mobile) ---------- */
   .tabbar {
     display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
@@ -672,8 +695,8 @@
     body { padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
     body[data-tab] .hero, body[data-tab] .rail, body[data-tab] main > section, body[data-tab] .colophon, body[data-tab] #warn, body[data-tab] #adapt-warn { display: none; }
     body[data-tab="today"] #sec-today, body[data-tab="today"] #adapt-warn, body[data-tab="today"] #warn { display: block; }
-    body[data-tab="plan"] #sec-periodisation, body[data-tab="plan"] #sec-plan { display: block; }
-    body[data-tab="allures"] #sec-splits, body[data-tab="allures"] #sec-stations { display: block; }
+    body[data-tab="plan"] #sec-periodisation, body[data-tab="plan"] #sec-plan, body[data-tab="plan"] #sec-nutrition { display: block; }
+    body[data-tab="allures"] #sec-splits, body[data-tab="allures"] #sec-stations, body[data-tab="allures"] #sec-race-nutrition { display: block; }
     body[data-tab="reglages"] .hero, body[data-tab="reglages"] .rail, body[data-tab="reglages"] .colophon, body[data-tab="reglages"] #warn { display: block; }
     body[data-tab]:not([data-tab="reglages"]) .cols { margin-top: 22px; }
     body[data-tab] .masthead p { display: none; }
@@ -790,6 +813,11 @@
         </select>
       </label>
 
+      <label class="field" for="weight">
+        <span class="lbl">Poids <span class="hint">kg · optionnel, pour la nutrition</span></span>
+        <input type="number" id="weight" inputmode="decimal" min="35" max="160" step="0.5" placeholder="ex. 75">
+      </label>
+
       <label class="field" for="remind">
         <span class="lbl">Rappel calendrier <span class="hint">fichier ICS</span></span>
         <select id="remind">
@@ -883,12 +911,28 @@
         <div class="weeks" id="weeks"></div>
       </section>
 
+      <section id="sec-nutrition">
+        <div class="sec-head">
+          <h2>Nutrition de la semaine</h2>
+          <p class="note" id="nutri-note"></p>
+        </div>
+        <div class="nutri-card" id="nutri-week"></div>
+      </section>
+
       <section id="sec-stations">
         <div class="sec-head">
           <h2>Barème des stations</h2>
           <p class="note" id="stn-note"></p>
         </div>
         <div class="stations" id="stations"></div>
+      </section>
+
+      <section id="sec-race-nutrition">
+        <div class="sec-head">
+          <h2>Nutrition de course</h2>
+          <p class="note">Les 48 h avant, le matin, pendant, après.</p>
+        </div>
+        <div class="nutri-card" id="nutri-race"></div>
       </section>
 
       <div class="colophon">
@@ -899,7 +943,7 @@
         <div class="legal-links">
           <button type="button" id="open-legal">Mentions légales &amp; confidentialité</button>
           <button type="button" id="reset-data">Effacer mes données</button>
-          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.2</span>
+          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.3</span>
         </div>
       </div>
     </main>
@@ -1442,6 +1486,124 @@
     return { warm:warm, main:s.lines, cool:cool };
   }
 
+  /* ============ nutrition ============
+     Repères généraux issus des consensus (CIO 2018, ISSN 2017) pour sportifs adultes en bonne santé.
+     Quantités exprimées par kg de poids corporel, ou en grammes si le poids est renseigné. */
+
+  function gk(cfg, lo, hi, unit) {
+    unit = unit || "g";
+    if (cfg.weight) {
+      var a = Math.round(lo * cfg.weight), b = Math.round(hi * cfg.weight);
+      return (a === b ? a : a + "–" + b) + " " + unit;
+    }
+    return (lo === hi ? lo : lo + "–" + hi) + " " + unit + "/kg";
+  }
+  function mlk(cfg, lo, hi) {
+    if (cfg.weight) { var a = Math.round(lo * cfg.weight / 50) * 50, b = Math.round(hi * cfg.weight / 50) * 50; return (a === b ? a : a + "–" + b) + " ml"; }
+    return lo + "–" + hi + " ml/kg";
+  }
+
+  var NUTRI_PHASE = {
+    base:  { carb:[4, 6],  prot:[1.6, 2.0], tips:[
+      "Assiette de base : la moitié en légumes, un quart en protéines (viande, poisson, œufs, légumineuses, tofu), un quart en féculents ; ajuste les féculents aux jours de séance.",
+      "Répartis les protéines sur 3 à 4 prises de 25–40 g dans la journée plutôt qu'en une seule fois.",
+      "Sommeil et régularité des repas comptent plus que n'importe quel complément à ce stade."
+    ]},
+    build: { carb:[5, 7],  prot:[1.6, 2.2], tips:[
+      "Monte les glucides les jours de qualité et de séances Hyrox (haut de la fourchette), redescends les jours faciles.",
+      "Repas ou collation glucidique dans les 2 h qui suivent les séances dures : c'est là que la récupération se joue.",
+      "Commence à tester tes gels ou boissons de course sur les séances longues — jamais d'aliment nouveau le jour J."
+    ]},
+    spec:  { carb:[6, 8],  prot:[1.8, 2.2], tips:[
+      "Les simulations se courent avec la nutrition de course (petit-déjeuner, gel, hydratation) pour la valider.",
+      "Ne cherche pas à perdre du poids en bloc spécifique : le déficit énergétique dégrade les séances clés et augmente le risque de blessure.",
+      "Fer, vitamine D : en cas de fatigue inexpliquée, fais le point avec ton médecin plutôt que de te supplémenter à l'aveugle."
+    ]},
+    taper: { carb:[7, 10], prot:[1.6, 2.0], tips:[
+      "Le volume baisse mais pas les glucides : les 36–48 h avant la course, vise 8–10 g/kg/jour pour remplir les réserves.",
+      "Réduis les fibres et les aliments gras la veille ; garde du sel normal dans l'assiette.",
+      "Hydrate-toi jusqu'à des urines claires ; pas d'alcool les 2 derniers jours."
+    ]}
+  };
+
+  function nutriWeek(cfg, week) {
+    var ph = week.deload ? "base" : week.phase;
+    var N = NUTRI_PHASE[ph];
+    var carb = week.deload ? [4, 5] : N.carb;
+    var items = [
+      { k:"Glucides / jour", v:gk(cfg, carb[0], carb[1]), s:"pain, riz, pâtes, pommes de terre, fruits, avoine" },
+      { k:"Protéines / jour", v:gk(cfg, N.prot[0], N.prot[1]), s:"en 3–4 prises de 25–40 g" },
+      { k:"Lipides / jour", v:gk(cfg, 0.8, 1.2), s:"huile d'olive, oléagineux, poissons gras" },
+      { k:"Eau / jour", v:mlk(cfg, 30, 40), s:"+ ce que tu perds à l'entraînement" }
+    ];
+    var tips = N.tips.slice();
+    if (week.deload) tips.unshift("Semaine de décharge : baisse un peu les féculents, garde les protéines — le corps reconstruit.");
+    if (week.race) tips = NUTRI_PHASE.taper.tips.slice();
+    return { label:PHASE_META[ph].label + (week.deload ? " · décharge" : ""), items:items, tips:tips };
+  }
+
+  function nutriSession(s, cfg) {
+    var hard = s.type === "qrun" || s.type === "hyrox" || s.type === "stations";
+    var before = [], during = [], after = [];
+    if (s.type === "easy" || s.type === "recup") {
+      before.push(s.dur <= 60 ? "Séance courte et facile : à jeun ou après un repas léger, au choix. Un verre d'eau avant de partir." : "Collation légère 60–90 min avant (banane, tartine de confiture) et " + mlk(cfg, 5, 7) + " d'eau.");
+      during.push(s.dur > 60 ? "Eau à volonté ; au-delà de 75', 30 g de glucides par heure (gel, dattes, boisson)." : "Rien de nécessaire, de l'eau si tu as soif.");
+      after.push("Repas normal dans les 2 h avec 20–30 g de protéines. Pas besoin de collation spéciale.");
+    } else if (s.type === "force") {
+      before.push("Repas 2–3 h avant avec " + gk(cfg, 1, 1) + " de glucides et 20–30 g de protéines (ex. riz + poulet, ou avoine + yaourt grec).");
+      before.push("Si tu t'entraînes tôt : collation 45–60 min avant, 30–40 g de glucides faciles + " + mlk(cfg, 5, 7) + " d'eau.");
+      during.push("Eau ; pas de glucides nécessaires sous 75'. Une boisson glucidique si la séance dépasse 75' ou enchaîne avec du cardio.");
+      after.push("Dans les 2 h : " + gk(cfg, 0.3, 0.4) + " de protéines (≈ 25–40 g : 150 g de viande/poisson, 4 œufs, 300 g de fromage blanc ou une dose de whey) + " + gk(cfg, 0.8, 1.0) + " de glucides.");
+    } else {
+      before.push("Repas 2–3 h avant : " + gk(cfg, 1, 2) + " de glucides, peu de gras et de fibres (riz blanc, pâtes, pain blanc, banane, compote), 20 g de protéines.");
+      before.push("Dans l'heure : 20–30 g de glucides rapides si tu as faim (banane, gel, pain d'épices) + " + mlk(cfg, 5, 7) + " d'eau 2 h avant, " + mlk(cfg, 3, 5) + " 15 min avant.");
+      if (hard && s.dur >= 60) before.push("Optionnel : caféine 2–3 mg/kg (≈ 1–2 expressos) 45–60 min avant, uniquement si tu y es habitué.");
+      if (s.dur >= 90) during.push("Séance longue : 30–60 g de glucides par heure dès la 30e minute (gel, boisson, dattes) + 400–800 ml d'eau par heure selon la chaleur, avec du sodium si tu transpires beaucoup.");
+      else if (s.dur >= 60) during.push("Eau régulière (une gorgée entre les blocs) ; 20–30 g de glucides à mi-séance si tu sens la baisse (demi-gel ou boisson).");
+      else during.push("Eau uniquement.");
+      after.push("Dans les 30–60 min : " + gk(cfg, 1, 1.2) + " de glucides + 25–40 g de protéines (ex. lait chocolaté + banane, riz + œufs, yaourt grec + granola + miel).");
+      after.push("Réhydrate 1,5 × le poids perdu en sueur (≈ 500 ml par heure d'effort intense, plus par forte chaleur), avec un peu de sel dans le repas suivant.");
+    }
+    if (s.race) {
+      return null;
+    }
+    return { before:before, during:during, after:after };
+  }
+
+  function nutriRace(cfg, R) {
+    var total = R.total, rows = R.rows;
+    // moments des gels : après la station 3 et après la station 6 si la course dure plus de 70 min
+    var gel1 = rows.filter(function (r) { return r.type === "stn" && r.n === 3; })[0];
+    var gel2 = rows.filter(function (r) { return r.type === "stn" && r.n === 6; })[0];
+    var caf = cfg.weight ? Math.round(cfg.weight * 3) + " mg" : "3 mg/kg";
+    var j2 = [
+      "J−2 et J−1 : " + gk(cfg, 8, 10) + " de glucides par jour, en 5–6 prises (riz, pâtes, pain blanc, pommes de terre, jus, compotes, pain d'épices). C'est plus que d'habitude : c'est normal de se sentir un peu lourd.",
+      "Réduis fibres, crudités, légumineuses et aliments gras la veille ; sel normal, pas d'alcool.",
+      "Bois régulièrement jusqu'à des urines claires. Dernier vrai repas la veille au soir, connu et déjà testé.",
+      "Prépare ton sac : gels testés, gourde, collation d'après-course."
+    ];
+    var morning = [
+      "H−3 : petit-déjeuner de " + gk(cfg, 2, 3) + " de glucides, pauvre en fibres et en gras (riz au lait, pain blanc + confiture + banane, porridge léger). 300–500 ml d'eau.",
+      "H−1 : 20–30 g de glucides faciles (banane, gel, barre) + 200–300 ml d'eau.",
+      "H−0:45 : caféine " + caf + " (≈ 1–2 expressos ou gel caféiné) si tu y es habitué ; sinon, rien de nouveau.",
+      "H−0:15 : quelques gorgées d'eau, puis plus rien. Échauffement à jeun de tout solide."
+    ];
+    var during = [];
+    if (total >= 4200) {
+      during.push("Course de plus de 70 min : vise 30–60 g de glucides par heure. Gel n°1 en sortant de la station 3 (≈ " + hms(gel1.cum) + "), gel n°2 en sortant de la station 6 (≈ " + hms(gel2.cum) + ").");
+    } else {
+      during.push("Course de moins de 70 min : un seul gel suffit, en sortant de la station 3 (≈ " + hms(gel1.cum) + "), ou rien si tu as bien déjeuné.");
+    }
+    during.push("Eau : une ou deux gorgées à chaque passage devant un point d'eau, jamais de grandes quantités. Le gel se prend avec de l'eau, avant une course à pied plutôt qu'avant une station.");
+    during.push("Rien de nouveau le jour J : gels, boisson et quantités déjà validés en simulation.");
+    var after = [
+      "Dans les 30–60 min : " + gk(cfg, 1, 1.2) + " de glucides + 25–40 g de protéines (boisson de récupération, sandwich, riz + poulet, lait chocolaté).",
+      "Réhydratation : 1,5 × le poids perdu, avec du sodium (soupe, bouillon, boisson électrolytes) sur les 4 heures suivantes.",
+      "Repas complet dans les 2–3 h, puis fêter ça. Les 48 h suivantes : glucides et protéines normaux, sommeil, pas d'intensité."
+    ];
+    return { j2:j2, morning:morning, during:during, after:after };
+  }
+
   /* ============ adaptation du plan au journal ============ */
 
   function adaptPlan(plan, cfg, today) {
@@ -1681,6 +1843,14 @@
       blockHTML("Échauffement", d.warm) +
       blockHTML(s.race ? "La course" : "Corps de séance", d.main, extra, "main") +
       blockHTML("Retour au calme", d.cool) + "</div>";
+    var nu = nutriSession(s, state.cfg);
+    if (nu) {
+      html += '<details class="nutri"><summary>Nutrition de la séance</summary><div class="blocks" style="margin-top:10px">' +
+        blockHTML("Avant", nu.before, "", "nu") + blockHTML("Pendant", nu.during, "", "nu") + blockHTML("Après", nu.after, "", "nu") + "</div>" +
+        (state.cfg.weight ? "" : '<p class="nu-hint">Renseigne ton poids dans les réglages pour des quantités en grammes.</p>') + "</details>";
+    } else if (s.race) {
+      html += '<p class="nu-hint">Protocole nutrition de course : voir l\'onglet Allures.</p>';
+    }
     if (s.family === "run" || s.family === "hyrox") {
       html += '<div class="paces">' +
         '<span class="pace">Course <b>' + pace(R.cible) + "</b></span>" +
@@ -1744,6 +1914,28 @@
     }
     document.getElementById("today").innerHTML = head + body;
     document.getElementById("today-note").textContent = cur ? "Valide ta séance en bas de carte : le plan s'adapte à ce que tu as réellement fait." : "Le plan s'adapte à ton journal.";
+  }
+
+  var NUTRI_DISCLAIMER = "Repères généraux pour adultes en bonne santé, issus des consensus internationaux (CIO 2018, ISSN 2017). Ils ne remplacent pas un suivi individuel : en cas de diabète, de pathologie rénale ou digestive, de grossesse, de trouble du comportement alimentaire ou de doute, consulte un médecin ou un diététicien du sport.";
+
+  function renderNutrition(cfg, R, plan, today) {
+    var week = plan.weeks.filter(function (w) { return today >= w.start && today <= w.end; })[0] || plan.weeks[0];
+    var N = nutriWeek(cfg, week);
+    document.getElementById("nutri-note").textContent = "Semaine S" + week.n + " · " + N.label + (cfg.weight ? " · " + cfg.weight + " kg" : " · quantités par kg");
+    document.getElementById("nutri-week").innerHTML =
+      '<div class="nutri-grid">' + N.items.map(function (it) {
+        return '<div class="fig"><span class="k">' + esc(it.k) + '</span><span class="v">' + esc(it.v) + '</span><span class="s">' + esc(it.s) + "</span></div>";
+      }).join("") + "</div>" +
+      '<ul class="nutri-tips">' + N.tips.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>" +
+      (cfg.weight ? "" : '<p class="nu-hint">Renseigne ton poids dans les réglages pour des quantités en grammes.</p>') +
+      '<p class="nutri-foot">' + esc(NUTRI_DISCLAIMER) + "</p>";
+
+    var RN = nutriRace(cfg, R);
+    function step(t, lines) { return '<div class="nutri-step"><div class="t">' + esc(t) + "</div><ul>" + lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul></div>"; }
+    document.getElementById("nutri-race").innerHTML = '<div class="nutri-steps">' +
+      step("Les 48 heures avant", RN.j2) + step("Le matin de la course", RN.morning) +
+      step("Pendant (" + hms(R.total) + " visé)", RN.during) + step("Après l'arrivée", RN.after) + "</div>" +
+      '<p class="nutri-foot">' + esc(NUTRI_DISCLAIMER) + "</p>";
   }
 
   function renderWeeks(cfg, plan, today) {
@@ -1812,6 +2004,8 @@
     var freq = parseInt(f.freq.value, 10);
     var weak = document.getElementById("weak").value;
     var remind = document.getElementById("remind").value;
+    var weight = parseFloat(String(document.getElementById("weight").value).replace(",", "."));
+    if (!(weight >= 35 && weight <= 160)) weight = null;
     var goal = parseInt(document.getElementById("goal").value, 10);
 
     var raceStr = document.getElementById("race-date").value;
@@ -1840,10 +2034,10 @@
 
     var loadKey = (division === "pro" ? "pro" : "open") + "_" + sex;
 
-    saveJSON(CKEY, { date:raceStr, planStart:toISO(monStart), division:division, sex:sex, level:level, freq:freq, weak:weak, remind:remind, goal:goal, goalTouched:goalTouched });
+    saveJSON(CKEY, { date:raceStr, planStart:toISO(monStart), division:division, sex:sex, level:level, freq:freq, weak:weak, remind:remind, weight:weight, goal:goal, goalTouched:goalTouched });
 
     return {
-      division:division, sex:sex, level:level, freq:freq, weak:weak, remind:remind, goal:goal,
+      division:division, sex:sex, level:level, freq:freq, weak:weak, remind:remind, weight:weight, goal:goal,
       raceDate:raceDate, daysLeft:daysLeft, today:today,
       weeks:clamped, rawWeeks:weeks,
       firstMonday:addDays(monRace, -(clamped - 1) * 7),
@@ -1863,6 +2057,7 @@
       if (c.freq) f.freq.value = String(c.freq);
       if (c.weak) document.getElementById("weak").value = c.weak;
       if (c.remind) document.getElementById("remind").value = c.remind;
+      if (c.weight) document.getElementById("weight").value = c.weight;
       if (c.goalTouched && c.goal) { document.getElementById("goal").value = c.goal; goalTouched = true; }
     } catch (e) { return false; }
     return true;
@@ -1898,6 +2093,7 @@
     renderSplits(cfg, R);
     renderWeeks(cfg, plan, cfg.today);
     renderStations(cfg, R);
+    renderNutrition(cfg, R, plan, cfg.today);
   }
 
   /* ============ interactions du journal ============ */
@@ -1974,11 +2170,14 @@
   }
   function startSession(s) {
     var R = state.R, d = detailSession(s, R), steps = [];
+    var nu = nutriSession(s, state.cfg);
+    if (nu && nu.during.length) steps.push({ phase:"Nutrition · pendant", text:nu.during[0] });
     d.warm.forEach(function (t) { steps.push({ phase:"Échauffement", text:t }); });
     d.main.forEach(function (t) { steps.push({ phase:"Corps de séance", text:t }); });
     if (s.focus) steps.push({ phase:"Corps de séance · focus", text:s.focus });
     if (s.adapt) steps.push({ phase:"Adaptation", text:s.adapt });
     d.cool.forEach(function (t) { steps.push({ phase:"Retour au calme", text:t }); });
+    if (nu && nu.after.length) steps.push({ phase:"Nutrition · après", text:nu.after[0] });
     var now = Date.now();
     SM = { s:s, steps:steps, i:0, t0:now, stepT0:now, laps:{}, timer:null };
     var l = getLog(s) || {};
