@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Generateur de plan d'entrainement Hyrox : periodisation, fiche d'allures des 16 segments et contenu de chaque seance.">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#EDEBE8" media="(prefers-color-scheme: light)">
@@ -10,6 +10,12 @@
 <meta property="og:title" content="Roxzone">
 <meta property="og:description" content="Construis ton plan d'entrainement Hyrox semaine par semaine.">
 <meta property="og:type" content="website">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Roxzone">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%276%27 fill=%27%2316171A%27/%3E%3Ccircle cx=%2716%27 cy=%2717%27 r=%278.5%27 fill=%27none%27 stroke=%27%23D1451F%27 stroke-width=%273%27/%3E%3Crect x=%2713%27 y=%274%27 width=%276%27 height=%273%27 rx=%271%27 fill=%27%23D1451F%27/%3E%3Cpath d=%27M16 13v4.5h3.5%27 stroke=%27%23EDEBE8%27 stroke-width=%272%27 stroke-linecap=%27round%27 fill=%27none%27/%3E%3C/svg%3E">
 <style>
   html { color-scheme: light dark; }
@@ -477,6 +483,122 @@
   }
   .warn[hidden] { display: none; }
 
+  /* ---------- aujourd'hui ---------- */
+  .today {
+    background: var(--surface); border: 1px solid var(--ink); border-radius: 4px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .today-head {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 12px 16px; background: var(--ink); color: var(--paper);
+  }
+  .today-head .td {
+    font-family: var(--display); font-variation-settings: "wdth" 108, "wght" 750;
+    text-transform: uppercase; letter-spacing: .05em; font-size: 14px;
+  }
+  .today-head .tm { font-family: var(--mono); font-size: 11.5px; opacity: .75; margin-left: auto; }
+  .today-body { padding: 16px 16px 14px; }
+  .today-title {
+    font-family: var(--display); font-variation-settings: "wdth" 104, "wght" 800;
+    font-size: clamp(22px, 4vw, 30px); line-height: 1.02; letter-spacing: -.02em; margin: 0 0 4px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .today-title .fam { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .today-sub { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 14px; }
+  .blocks { display: grid; gap: 10px; }
+  .block { border: 1px solid var(--rule); border-radius: 3px; padding: 10px 12px; background: var(--surface-2); }
+  .block.main { background: var(--surface); border-color: var(--ink-3); }
+  .block .bt {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink-3); display: flex; justify-content: space-between; margin-bottom: 6px;
+  }
+  .block ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13.5px; }
+  .block li { padding-left: 13px; position: relative; }
+  .block li::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 1px; background: var(--ink-3); }
+  .block li.focus { color: var(--ink); font-weight: 500; }
+  .block li.focus::before { background: var(--accent); height: 2px; }
+  .block li.adapt { color: var(--accent); font-weight: 500; }
+  .paces { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .pace {
+    font-family: var(--mono); font-size: 11px; padding: 4px 8px; border-radius: 2px;
+    border: 1px solid var(--rule); background: var(--surface-2); color: var(--ink-2);
+  }
+  .pace b { color: var(--ink); font-weight: 600; }
+  .log { border-top: 1px solid var(--rule); padding: 14px 16px 16px; background: var(--surface-2); }
+  .log-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .log .lbl { font-size: 12px; font-weight: 600; margin-bottom: 7px; display: flex; justify-content: space-between; }
+  .status { display: flex; gap: 3px; background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 3px; }
+  .status button {
+    flex: 1; font-family: var(--body); font-size: 12.5px; font-weight: 500; cursor: pointer;
+    padding: 7px 4px; border: 0; border-radius: 2px; background: transparent; color: var(--ink-2);
+  }
+  .status button:hover { color: var(--ink); }
+  .status button.on[data-s="done"] { background: var(--force); color: #fff; font-weight: 600; }
+  .status button.on[data-s="partial"] { background: var(--ink); color: var(--paper); font-weight: 600; }
+  .status button.on[data-s="missed"] { background: var(--accent); color: var(--accent-on); font-weight: 600; }
+  .log textarea {
+    width: 100%; font-family: var(--body); font-size: 13px; color: var(--ink);
+    background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 8px 9px;
+    min-height: 58px; resize: vertical;
+  }
+  .log .check { display: flex; align-items: center; gap: 8px; font-size: 12.5px; margin-top: 10px; cursor: pointer; }
+  .log .check input { accent-color: var(--accent); width: 16px; height: 16px; }
+  .log-note { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); margin-top: 10px; min-height: 1em; }
+  .rpe-read { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 600; }
+  .rest { padding: 18px 16px; }
+  .rest h3 { font-family: var(--display); font-variation-settings: "wdth" 104, "wght" 800; font-size: 24px; margin: 0 0 6px; letter-spacing: -.02em; }
+  .rest p { margin: 0 0 4px; color: var(--ink-2); font-size: 13.5px; }
+  .next { margin-top: 10px; font-size: 13px; }
+  .next b { font-weight: 600; }
+  .prog { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-top: 12px; }
+  .prog .bar-w { flex: 1; min-width: 120px; height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+  .prog .bar-f { height: 100%; background: var(--force); border-radius: 3px; }
+
+  /* journal dans les cartes semaine */
+  .ses-log { grid-column: 3; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .ses-log .mini {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .04em; cursor: pointer;
+    padding: 3px 7px; border-radius: 2px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink-3);
+  }
+  .ses-log .mini:hover { color: var(--ink); border-color: var(--ink-3); }
+  .ses-log .mini.on-done { background: var(--force); border-color: var(--force); color: #fff; }
+  .ses-log .mini.on-partial { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .ses-log .mini.on-missed { background: var(--accent); border-color: var(--accent); color: var(--accent-on); }
+  .ses-log .rpe-tag { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
+  .ses.past-missed { opacity: .72; }
+  .ses.is-today { box-shadow: inset 3px 0 0 var(--force); }
+  .adapt-list { margin: 0; padding-left: 18px; font-size: 12.5px; }
+  .adapt-list li { margin: 2px 0; }
+
+  /* bandeau d'installation */
+  .install {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--ink); color: var(--paper); border-radius: 4px;
+    padding: 10px 14px; margin-top: 18px; font-size: 13px;
+  }
+  .install b { font-weight: 600; }
+  .install .btn { background: var(--paper); color: var(--ink); border-color: var(--paper); padding: 6px 10px; }
+  .install .x { margin-left: auto; background: transparent; border: 0; color: var(--paper); cursor: pointer; font-size: 18px; line-height: 1; opacity: .7; }
+  .install .x:hover { opacity: 1; }
+  .install[hidden] { display: none; }
+
+  /* mentions légales */
+  .legal-links { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+  .legal-links button { background: none; border: 0; padding: 0; color: var(--ink-2); font: inherit; font-size: 12.5px; text-decoration: underline; cursor: pointer; }
+  dialog.legal {
+    border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); color: var(--ink);
+    max-width: 680px; width: calc(100% - 32px); padding: 0; box-shadow: var(--shadow);
+  }
+  dialog.legal::backdrop { background: rgba(0,0,0,.55); }
+  .legal-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--rule); background: var(--surface-2); }
+  .legal-head h2 { margin: 0; font-family: var(--display); font-variation-settings: "wdth" 108, "wght" 750; font-size: 15px; text-transform: uppercase; letter-spacing: .04em; }
+  .legal-head button { background: none; border: 0; font-size: 20px; cursor: pointer; color: var(--ink-2); }
+  .legal-body { padding: 16px 18px 20px; font-size: 13.5px; line-height: 1.55; max-height: 70vh; overflow: auto; }
+  .legal-body h3 { font-size: 13.5px; margin: 16px 0 6px; }
+  .legal-body h3:first-child { margin-top: 0; }
+  .legal-body p { margin: 0 0 8px; color: var(--ink-2); }
+  .legal-body strong { color: var(--ink); }
+
   @media (max-width: 980px) {
     .cols { grid-template-columns: 1fr; gap: 26px; }
     .rail { position: static; }
@@ -487,6 +609,9 @@
     .ses { grid-template-columns: 46px minmax(0,1fr); gap: 4px 10px; }
     .ses-detail { grid-column: 2; }
     .ses-dur { grid-column: 2; text-align: left; padding-top: 4px; }
+    .ses-log { grid-column: 2; }
+    .log-row { grid-template-columns: 1fr; }
+    .today-head .tm { margin-left: 0; width: 100%; }
     .band .bw { display: none; }
     .chart-card { --gutter: 38px; padding-inline: 12px; }
     .bar-flag { display: none; }
@@ -514,6 +639,11 @@
     <h1>Construis ton plan<br><em>Hyrox</em> semaine par semaine</h1>
     <p class="lede">Renseigne ta date de course et ton objectif&nbsp;: le plan calcule ta périodisation, tes allures cibles pour chacun des 16&nbsp;segments et le contenu de chaque séance.</p>
     <div class="figures" id="figures"></div>
+    <div class="install" id="install" hidden>
+      <span id="install-text"><b>Installe Roxzone sur ton téléphone</b> — elle s'ouvre en plein écran et fonctionne hors ligne.</span>
+      <button type="button" class="btn" id="install-btn" hidden>Installer</button>
+      <button type="button" class="x" id="install-x" aria-label="Fermer">×</button>
+    </div>
   </div>
 
   <div class="cols">
@@ -583,6 +713,7 @@
       </label>
 
       <div class="rail-foot">
+        <button type="button" class="btn" id="dl-ics" hidden>Ajouter au calendrier <span class="ext">ICS</span></button>
         <button type="button" class="btn" id="dl-plan" hidden>Télécharger le plan <span class="ext">CSV</span></button>
         <button type="button" class="btn" id="dl-splits" hidden>Fiche d'allures <span class="ext">CSV</span></button>
         <p class="save-note" id="save-note"></p>
@@ -592,6 +723,15 @@
     <!-- ====== PLAN ====== -->
     <main>
       <div class="warn" id="warn" hidden></div>
+      <div class="warn" id="adapt-warn" hidden></div>
+
+      <section id="sec-today">
+        <div class="sec-head">
+          <h2>Aujourd'hui</h2>
+          <p class="note" id="today-note"></p>
+        </div>
+        <div class="today" id="today"></div>
+      </section>
 
       <section id="sec-periodisation">
         <div class="sec-head">
@@ -667,10 +807,33 @@
         <p><strong>Méthode.</strong> La répartition du chrono suit le profil observé en course&nbsp;: environ la moitié du temps sur les 8&nbsp;km, un peu plus d'un tiers sur les stations, le reste en roxzone. Les allures de séance en découlent&nbsp;: endurance = cible&nbsp;+&nbsp;55&nbsp;s/km, seuil = cible&nbsp;−&nbsp;12&nbsp;s/km, VMA = cible&nbsp;−&nbsp;35&nbsp;s/km.</p>
         <p><strong>Charge.</strong> Progression par blocs avec décharge toutes les 4&nbsp;semaines, pic en bloc spécifique, puis affûtage sur la dernière semaine (volume&nbsp;−40&nbsp;%, intensité maintenue).</p>
         <p>Plan indicatif, à ajuster selon ta fatigue et tes contraintes. Ce n'est pas un avis médical&nbsp;: en cas de douleur ou de pathologie, consulte un professionnel de santé.</p>
+        <p><strong>Tes données.</strong> Paramètres et journal sont enregistrés uniquement sur cet appareil, dans ton navigateur. Rien n'est envoyé sur un serveur.</p>
+        <div class="legal-links">
+          <button type="button" id="open-legal">Mentions légales &amp; confidentialité</button>
+          <button type="button" id="reset-data">Effacer mes données</button>
+          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.1</span>
+        </div>
       </div>
     </main>
   </div>
 </div>
+
+<dialog class="legal" id="legal">
+  <div class="legal-head"><h2>Mentions légales &amp; confidentialité</h2><button type="button" id="close-legal" aria-label="Fermer">×</button></div>
+  <div class="legal-body">
+    <h3>Éditeur</h3>
+    <p>Roxzone est édité par <strong>SRL Docteur Clanet Matthieu</strong>, Place Guy d'Arezzo 3, 1180 Uccle (Belgique). Contact&nbsp;: matthieuclanet@gmail.com.</p>
+    <h3>Hébergement</h3>
+    <p>Le site est hébergé par GitHub Pages (GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis).</p>
+    <h3>Données personnelles</h3>
+    <p>Roxzone ne crée pas de compte et ne transmet aucune donnée à un serveur. Les paramètres de ton plan et ton journal d'entraînement (séances validées, ressenti, notes) sont stockés uniquement dans le navigateur de ton appareil (stockage local). Tu peux les effacer à tout moment avec le bouton «&nbsp;Effacer mes données&nbsp;» ou en vidant les données du site dans ton navigateur.</p>
+    <p>Le site charge des polices depuis Google Fonts&nbsp;; lors de ce chargement, ton adresse IP est transmise à Google. Aucun outil de mesure d'audience ni cookie publicitaire n'est utilisé.</p>
+    <h3>Avertissement santé</h3>
+    <p>Les plans, allures et recommandations sont fournis à titre indicatif, sur la base des informations que tu renseignes. Ils ne constituent ni un avis médical ni une prescription individuelle. Avant d'entreprendre un programme d'entraînement intensif, et en cas de douleur, de pathologie ou de doute sur ton état de santé, consulte un professionnel de santé. L'éditeur ne peut être tenu responsable des blessures ou dommages résultant de l'utilisation du plan.</p>
+    <h3>Propriété intellectuelle</h3>
+    <p>Le contenu de Roxzone (méthode, textes, interface) est protégé. HYROX est une marque déposée de son titulaire&nbsp;; Roxzone est un outil indépendant, <strong>non affilié à HYROX</strong> et non approuvé par celui-ci.</p>
+  </div>
+</dialog>
 
 <script>
 (function () {
@@ -1101,6 +1264,135 @@
     return { weeks:weeks, phases:phases, counts:counts, baseKm:baseKm };
   }
 
+  /* ============ journal (stockage local) ============ */
+
+  var JKEY = "roxzone-journal", CKEY = "roxzone-config";
+  function loadJSON(k) { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } }
+  function saveJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  var journal = loadJSON(JKEY) || {};
+
+  function skey(s) { return toISO(s.date) + "|" + s.type; }
+  function getLog(s) { return journal[skey(s)] || null; }
+  function setLog(s, patch) {
+    var k = skey(s), cur = journal[k] || {};
+    Object.keys(patch).forEach(function (p) { cur[p] = patch[p]; });
+    cur.ts = Date.now();
+    journal[k] = cur;
+    saveJSON(JKEY, journal);
+  }
+  function todayDate() {
+    var q = /[?&]today=(\d{4}-\d{2}-\d{2})/.exec(location.search);
+    var t = new Date();
+    if (q) { var p = q[1].split("-"); t = new Date(+p[0], +p[1] - 1, +p[2]); }
+    t.setHours(0, 0, 0, 0);
+    return t;
+  }
+  function sameDay(a, b) { return a.getTime() === b.getTime(); }
+  var STATUS_LABEL = { done:"Faite", partial:"Partielle", missed:"Manquée" };
+  var STATUS_W = { done:1, partial:0.5, missed:0 };
+
+  /* ============ détail d'une séance ============ */
+
+  function detailSession(s, R) {
+    var warm = [], cool = [];
+    if (s.race) {
+      warm = [ "Arrivée 90' avant le départ, échauffement 15' : trot, mobilité, 3 accélérations", "Un passage à vide sur SkiErg et rameur pour régler les machines" ];
+      cool = [ "Marcher 10', s'hydrater, manger dans l'heure", "48 h sans intensité, puis reprise souple" ];
+    } else if (s.family === "run") {
+      warm = s.type === "easy"
+        ? [ "5' de marche rapide puis départ à allure très souple" ]
+        : [ "15' footing progressif @ " + pace(R.facile), "Gammes : montées de genoux, talons-fesses, foulées bondissantes (2 × 20 m)", "4 lignes droites de 80 m en accélération" ];
+      cool = s.type === "easy" ? [ "5' de marche, étirements légers des mollets et ischios" ] : [ "10' trot @ " + pace(R.facile + 20), "Étirements légers, boisson et collation dans les 30'" ];
+    } else if (s.family === "force") {
+      warm = [ "8' cardio léger (vélo, rameur ou SkiErg à faible intensité)", "Mobilité hanches / chevilles / thoracique 5'", "Montée en charge progressive sur le premier exercice (2–3 séries légères)" ];
+      cool = [ "Retour au calme 5' + respiration", "Mobilité épaules et hanches 5'" ];
+    } else if (s.family === "hyrox") {
+      warm = [ "12' footing @ " + pace(R.facile) + " avec 3 accélérations de 20 s", "2 stations à vide : 250 m SkiErg souple + 10 wall balls", "Préparer le matériel et chronométrer les transitions" ];
+      cool = [ "8' marche ou trot très souple", "Noter tes temps par station dans le journal" ];
+    } else {
+      warm = []; cool = [];
+    }
+    return { warm:warm, main:s.lines, cool:cool };
+  }
+
+  /* ============ adaptation du plan au journal ============ */
+
+  function adaptPlan(plan, cfg, today) {
+    var msgs = [];
+    var ws = plan.weeks;
+    var cw = -1;
+    ws.forEach(function (w, i) { if (today >= w.start && today <= w.end) cw = i; });
+    if (cw < 0) return msgs;
+
+    function logs(from, to, pred) {
+      var out = [];
+      ws.forEach(function (w) { w.sessions.forEach(function (s) {
+        if (s.date >= from && s.date <= to && (!pred || pred(s))) { var l = getLog(s); if (l) out.push({ s:s, l:l }); }
+      }); });
+      return out;
+    }
+    function markFuture(fn, days) {
+      var until = days ? addDays(today, days) : ws[cw].end;
+      ws.forEach(function (w) { w.sessions.forEach(function (s) {
+        if (s.race || s.date < today || s.date > until) return;
+        fn(s);
+      }); });
+    }
+
+    // 1. Semaine précédente peu réalisée → reprise progressive
+    if (cw > 0) {
+      var prev = ws[cw - 1];
+      var planned = prev.sessions.filter(function (s) { return !s.race; });
+      if (planned.length >= 2) {
+        var score = 0;
+        planned.forEach(function (s) { var l = getLog(s); if (l && l.status) score += STATUS_W[l.status]; });
+        var adh = score / planned.length;
+        var logged = planned.filter(function (s) { var l = getLog(s); return l && l.status; }).length;
+        if (logged >= 1 && adh < 0.5) {
+          markFuture(function (s) {
+            s.dur = Math.round(s.dur * 0.75);
+            s.adapt = "Reprise après une semaine incomplète : volume réduit d'un quart, intensité conservée. Ne rattrape pas les séances manquées.";
+          });
+          msgs.push("Semaine S" + prev.n + " réalisée à " + Math.round(adh * 100) + " % : cette semaine est allégée (−25 % de volume). On ne rattrape pas, on reprend le fil.");
+        }
+      }
+    }
+
+    // 2. Ressenti élevé récent → fatigue
+    var recent = logs(addDays(today, -7), today, function (s) { return !s.race; })
+      .filter(function (x) { return (x.l.status === "done" || x.l.status === "partial") && x.l.rpe; });
+    if (recent.length >= 2) {
+      var mean = recent.reduce(function (a, x) { return a + x.l.rpe; }, 0) / recent.length;
+      if (mean >= 8.5) {
+        markFuture(function (s) {
+          s.dur = Math.round(s.dur * 0.85);
+          s.adapt = (s.adapt ? s.adapt + " " : "") + "Fatigue élevée (RPE moyen " + fr(mean) + ") : baisse d'un cran l'intensité, garde la technique, priorité au sommeil.";
+        });
+        msgs.push("RPE moyen de " + fr(mean) + "/10 sur tes dernières séances : les séances de cette semaine sont réduites (−15 %). Si ça persiste, prends 2 jours de repos complet.");
+      } else if (recent.length >= 3 && mean <= 5 && !ws[cw].deload && ws[cw].phase !== "taper") {
+        msgs.push("Ressenti facile (RPE moyen " + fr(mean) + "/10) : tu peux viser le haut de la fourchette d'allure sur la qualité, sans ajouter de volume.");
+      }
+    }
+
+    // 3. Douleur signalée
+    var pain = logs(addDays(today, -7), today).filter(function (x) { return x.l.pain; });
+    if (pain.length) {
+      markFuture(function (s) {
+        if (s.family === "run" || s.family === "hyrox") {
+          s.adapt = (s.adapt ? s.adapt + " " : "") + "Douleur signalée : remplace la course par vélo ou rameur à faible intensité tant qu'elle persiste ; aucun travail en fatigue.";
+        }
+      }, 7);
+      msgs.push("Tu as signalé une douleur. Les séances de course des 7 prochains jours sont à remplacer par du vélo ou du rameur souple. Si la douleur dure plus de 5 jours, augmente ou t'oblige à modifier ta foulée, consulte un professionnel de santé.");
+    }
+
+    // 4. Séance manquée hier
+    var y = logs(addDays(today, -2), addDays(today, -1)).filter(function (x) { return x.l.status === "missed"; });
+    if (y.length && !pain.length) {
+      msgs.push("Séance manquée récemment : ne la rattrape pas en doublant, poursuis simplement le plan.");
+    }
+    return msgs;
+  }
+
   /* ============ rendu ============ */
 
   var el = {
@@ -1244,7 +1536,88 @@
       Math.round(R.roxTotal / R.total * 100) + "&nbsp;%.";
   }
 
-  function renderWeeks(cfg, plan) {
+  var DAYS_LONG = ["lundi","mardi","mercredi","jeudi","vendredi","samedi","dimanche"];
+  function dayLabel(d) { return DAYS_LONG[(d.getDay() + 6) % 7] + " " + longDate(d); }
+
+  function blockHTML(title, lines, extra, cls) {
+    if (!lines.length && !extra) return "";
+    return '<div class="block' + (cls ? " " + cls : "") + '"><div class="bt"><span>' + esc(title) + "</span></div><ul>" +
+      lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + (extra || "") + "</ul></div>";
+  }
+
+  function sessionDetailHTML(s, R) {
+    var d = detailSession(s, R);
+    var extra = "";
+    if (s.focus) extra += '<li class="focus">' + esc(s.focus) + "</li>";
+    if (s.adapt) extra += '<li class="adapt">' + esc(s.adapt) + "</li>";
+    var html = '<div class="blocks">' +
+      blockHTML("Échauffement", d.warm) +
+      blockHTML(s.race ? "La course" : "Corps de séance", d.main, extra, "main") +
+      blockHTML("Retour au calme", d.cool) + "</div>";
+    if (s.family === "run" || s.family === "hyrox") {
+      html += '<div class="paces">' +
+        '<span class="pace">Course <b>' + pace(R.cible) + "</b></span>" +
+        '<span class="pace">Seuil <b>' + pace(R.seuil) + "</b></span>" +
+        '<span class="pace">VMA <b>' + pace(R.vma) + "</b></span>" +
+        '<span class="pace">Endurance <b>' + pace(R.facile) + "</b></span>" +
+        '<span class="pace">SkiErg <b>' + per500(R.station.ski) + "</b></span>" +
+        '<span class="pace">Rameur <b>' + per500(R.station.row) + "</b></span></div>";
+    }
+    return html;
+  }
+
+  function logHTML(s) {
+    var l = getLog(s) || {};
+    function b(st) { return '<button type="button" data-s="' + st + '" class="' + (l.status === st ? "on" : "") + '">' + STATUS_LABEL[st] + "</button>"; }
+    return '<div class="log" data-k="' + esc(skey(s)) + '">' +
+      '<div class="log-row"><div><div class="lbl">Séance</div><div class="status">' + b("done") + b("partial") + b("missed") + "</div>" +
+      '<label class="check"><input type="checkbox" id="log-pain"' + (l.pain ? " checked" : "") + "> J'ai ressenti une douleur</label></div>" +
+      '<div><div class="lbl">Ressenti (RPE) <span class="rpe-read" id="rpe-read">' + (l.rpe ? l.rpe + "/10" : "—") + "</span></div>" +
+      '<input type="range" id="log-rpe" min="1" max="10" step="1" value="' + (l.rpe || 6) + '" aria-label="RPE">' +
+      '<div class="lbl" style="margin-top:10px">Notes</div><textarea id="log-note" placeholder="Chronos par station, sensations, conditions…">' + esc(l.note || "") + "</textarea></div></div>" +
+      '<div class="log-note" id="log-saved">' + (l.ts ? "Enregistré sur cet appareil." : "") + "</div></div>";
+  }
+
+  function renderToday(cfg, R, plan, today) {
+    var all = [];
+    plan.weeks.forEach(function (w) { w.sessions.forEach(function (s) { all.push(s); }); });
+    var cur = all.filter(function (s) { return sameDay(s.date, today); })[0];
+    var next = all.filter(function (s) { return s.date > today; })[0];
+    var week = plan.weeks.filter(function (w) { return today >= w.start && today <= w.end; })[0];
+
+    // progression
+    var wk = week ? week.sessions.filter(function (s) { return !s.race; }) : [];
+    var wkDone = wk.reduce(function (a, s) { var l = getLog(s); return a + (l && l.status ? STATUS_W[l.status] : 0); }, 0);
+    var past = all.filter(function (s) { return !s.race && s.date < today; });
+    var pastScore = past.reduce(function (a, s) { var l = getLog(s); return a + (l && l.status ? STATUS_W[l.status] : 0); }, 0);
+    var adh = past.length ? Math.round(pastScore / past.length * 100) : null;
+    var prog = '<div class="prog">' +
+      (week ? "<span>Semaine S" + week.n + " · " + fr(wkDone).replace(",0", "") + "/" + wk.length + " séances</span>" : "") +
+      '<div class="bar-w"><div class="bar-f" style="width:' + (wk.length ? Math.round(wkDone / wk.length * 100) : 0) + '%"></div></div>' +
+      (adh !== null ? "<span>Adhérence plan " + adh + " %</span>" : "<span>Adhérence : à partir de ta première séance</span>") + "</div>";
+
+    var head = '<div class="today-head"><span class="td">' + esc(dayLabel(today)) + "</span>" +
+      (week ? '<span class="chip phase" style="background:transparent;border-color:var(--paper);color:var(--paper)">' + esc(PHASE_META[week.phase].label) + (week.deload ? " · décharge" : "") + "</span>" : "") +
+      '<span class="tm">J−' + cfg.daysLeft + " avant la course</span></div>";
+
+    var body;
+    if (cfg.daysLeft < 0) {
+      body = '<div class="rest"><h3>Course passée</h3><p>Bravo pour ta course ! Renseigne ta prochaine date pour construire le plan suivant.</p></div>';
+    } else if (cur) {
+      body = '<div class="today-body"><h3 class="today-title"><i class="fam fam-' + cur.family + '"></i>' + esc(cur.title) + "</h3>" +
+        '<div class="today-sub">' + esc(FAM_LABEL[cur.family]) + " · " + esc(cur.kind) + " · " + (cur.race ? "~" : "") + cur.dur + " min</div>" +
+        sessionDetailHTML(cur, R) + prog + "</div>" + (cur.race ? "" : logHTML(cur));
+    } else {
+      body = '<div class="rest"><h3>Repos aujourd\'hui</h3><p>Le repos fait partie du plan : sommeil, hydratation, marche ou mobilité légère.</p>' +
+        (next ? '<p class="next">Prochaine séance : <b>' + esc(dayLabel(next.date)) + "</b> — " + esc(next.title) + " (" + next.dur + " min)</p>" +
+          '<details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;font-weight:600">Voir le détail de la prochaine séance</summary><div style="margin-top:10px">' + sessionDetailHTML(next, R) + "</div></details>" : "") +
+        prog + "</div>";
+    }
+    document.getElementById("today").innerHTML = head + body;
+    document.getElementById("today-note").textContent = cur ? "Valide ta séance en bas de carte : le plan s'adapte à ce que tu as réellement fait." : "Le plan s'adapte à ton journal.";
+  }
+
+  function renderWeeks(cfg, plan, today) {
     el.planNote.textContent = cfg.freq + " séances par semaine · " + LEVELS[cfg.level].label +
       " · " + WEAK_LABEL[cfg.weak].toLowerCase();
 
@@ -1256,13 +1629,23 @@
       var rows = w.sessions.map(function (s) {
         var lines = s.lines.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("");
         if (s.focus) lines += '<li class="focus">' + esc(s.focus) + "</li>";
-        return '<div class="ses' + (s.race ? " is-race" : "") + '">' +
+        if (s.adapt) lines += '<li class="adapt">' + esc(s.adapt) + "</li>";
+        var l = getLog(s) || {};
+        var cls = "ses" + (s.race ? " is-race" : "") + (sameDay(s.date, today) ? " is-today" : "") + (l.status === "missed" ? " past-missed" : "");
+        var log = "";
+        if (!s.race && s.date <= today) {
+          log = '<div class="ses-log" data-k="' + esc(skey(s)) + '">' +
+            ["done","partial","missed"].map(function (st) {
+              return '<button type="button" class="mini' + (l.status === st ? " on-" + st : "") + '" data-s="' + st + '">' + STATUS_LABEL[st] + "</button>";
+            }).join("") + (l.rpe ? '<span class="rpe-tag">RPE ' + l.rpe + "</span>" : "") + "</div>";
+        }
+        return '<div class="' + cls + '">' +
           '<div class="ses-day">' + esc(DAYS[(s.date.getDay() + 6) % 7]) +
             "<b>" + s.date.getDate() + "</b></div>" +
           '<div><div class="ses-name"><i class="fam fam-' + s.family + '"></i>' + esc(s.title) + "</div>" +
             '<span class="ses-kind">' + esc(FAM_LABEL[s.family]) + " · " + esc(s.kind) + "</span></div>" +
           '<div class="ses-detail"><ul>' + lines + "</ul></div>" +
-          '<div class="ses-dur">' + (s.race ? "~" + Math.round(s.dur) + "'" : s.dur + "'") + "</div>" +
+          '<div class="ses-dur">' + (s.race ? "~" + Math.round(s.dur) + "'" : s.dur + "'") + "</div>" + log +
           "</div>";
       }).join("");
 
@@ -1302,7 +1685,7 @@
     var goal = parseInt(document.getElementById("goal").value, 10);
 
     var raceStr = document.getElementById("race-date").value;
-    var today = new Date(); today.setHours(0, 0, 0, 0);
+    var today = todayDate();
     var raceDate;
     if (raceStr) {
       var p = raceStr.split("-");
@@ -1313,25 +1696,58 @@
 
     var daysLeft = Math.round((raceDate - today) / 86400000);
     var monNow = mondayOf(today), monRace = mondayOf(raceDate);
-    var weeks = Math.round((monRace - monNow) / (7 * 86400000)) + 1;
-    var clamped = Math.min(24, Math.max(2, weeks));
+    var weeks = Math.round((monRace - monNow) / (7 * 86400000)) + 1; // semaines restantes (avertissements)
+
+    // Le plan est ancré sur la semaine où il a été créé pour cette course :
+    // les semaines passées restent visibles et la numérotation ne bouge pas.
+    var prevCfg = loadJSON(CKEY) || {};
+    var planStart = (prevCfg.date === raceStr && prevCfg.planStart) ? prevCfg.planStart : toISO(monNow);
+    var ps = planStart.split("-");
+    var monStart = mondayOf(new Date(+ps[0], +ps[1] - 1, +ps[2]));
+    if (monStart > monNow) monStart = monNow;
+    var total = Math.round((monRace - monStart) / (7 * 86400000)) + 1;
+    var clamped = Math.min(24, Math.max(2, total));
 
     var loadKey = (division === "pro" ? "pro" : "open") + "_" + sex;
 
+    saveJSON(CKEY, { date:raceStr, planStart:toISO(monStart), division:division, sex:sex, level:level, freq:freq, weak:weak, goal:goal, goalTouched:goalTouched });
+
     return {
       division:division, sex:sex, level:level, freq:freq, weak:weak, goal:goal,
-      raceDate:raceDate, daysLeft:daysLeft,
+      raceDate:raceDate, daysLeft:daysLeft, today:today,
       weeks:clamped, rawWeeks:weeks,
       firstMonday:addDays(monRace, -(clamped - 1) * 7),
       loads:LOADS[loadKey]
     };
   }
 
+  function restoreConfig() {
+    var c = loadJSON(CKEY);
+    if (!c) return false;
+    var f = document.getElementById("params");
+    try {
+      if (c.date) document.getElementById("race-date").value = c.date;
+      if (c.division) f.division.value = c.division;
+      if (c.sex) f.sex.value = c.sex;
+      if (c.level) f.level.value = c.level;
+      if (c.freq) f.freq.value = String(c.freq);
+      if (c.weak) document.getElementById("weak").value = c.weak;
+      if (c.goalTouched && c.goal) { document.getElementById("goal").value = c.goal; goalTouched = true; }
+    } catch (e) { return false; }
+    return true;
+  }
+
   function render() {
     var cfg = readConfig();
     var R = buildRace(cfg);
     var plan = buildPlan(cfg, R);
-    state = { cfg:cfg, R:R, plan:plan };
+    var adaptations = adaptPlan(plan, cfg, cfg.today);
+    state = { cfg:cfg, R:R, plan:plan, adaptations:adaptations };
+
+    var aw = document.getElementById("adapt-warn");
+    aw.hidden = !adaptations.length;
+    aw.innerHTML = adaptations.length ? "<strong>Adaptation du plan</strong><ul class=\"adapt-list\">" +
+      adaptations.map(function (m) { return "<li>" + esc(m) + "</li>"; }).join("") + "</ul>" : "";
 
     el.goalRead.textContent = hms(cfg.goal);
     el.goalHint.textContent = pace(R.cible) + " en course";
@@ -1346,11 +1762,60 @@
     el.warn.textContent = warn;
 
     renderFigures(cfg, R, plan);
+    renderToday(cfg, R, plan, cfg.today);
     renderChart(plan);
     renderSplits(cfg, R);
-    renderWeeks(cfg, plan);
+    renderWeeks(cfg, plan, cfg.today);
     renderStations(cfg, R);
   }
+
+  /* ============ interactions du journal ============ */
+
+  function findSession(key) {
+    var out = null;
+    state.plan.weeks.forEach(function (w) { w.sessions.forEach(function (s) { if (skey(s) === key) out = s; }); });
+    return out;
+  }
+
+  document.getElementById("today").addEventListener("click", function (e) {
+    var b = e.target.closest(".status button");
+    if (!b) return;
+    var s = findSession(b.closest(".log").dataset.k);
+    if (!s) return;
+    var cur = getLog(s) || {};
+    setLog(s, { status: cur.status === b.dataset.s ? null : b.dataset.s });
+    render();
+  });
+  document.getElementById("today").addEventListener("input", function (e) {
+    var box = e.target.closest(".log");
+    if (!box) return;
+    var s = findSession(box.dataset.k);
+    if (!s) return;
+    if (e.target.id === "log-rpe") {
+      setLog(s, { rpe: parseInt(e.target.value, 10) });
+      document.getElementById("rpe-read").textContent = e.target.value + "/10";
+    } else if (e.target.id === "log-note") {
+      setLog(s, { note: e.target.value });
+    } else if (e.target.id === "log-pain") {
+      setLog(s, { pain: e.target.checked });
+      render();
+      return;
+    }
+    var n = document.getElementById("log-saved");
+    if (n) n.textContent = "Enregistré sur cet appareil.";
+  });
+  document.getElementById("today").addEventListener("change", function (e) {
+    if (e.target.id === "log-rpe") render();
+  });
+  el.weeks.addEventListener("click", function (e) {
+    var b = e.target.closest(".ses-log .mini");
+    if (!b) return;
+    var s = findSession(b.closest(".ses-log").dataset.k);
+    if (!s) return;
+    var cur = getLog(s) || {};
+    setLog(s, { status: cur.status === b.dataset.s ? null : b.dataset.s });
+    render();
+  });
 
   /* ============ export ============ */
 
@@ -1363,19 +1828,60 @@
   }
 
   function planCSV() {
-    var s = state, rows = [["Semaine","Bloc","Date","Jour","Séance","Famille","Type","Durée (min)","Contenu"]];
+    var s = state, rows = [["Semaine","Bloc","Date","Jour","Séance","Famille","Type","Durée (min)","Contenu","Statut","RPE","Notes"]];
     s.plan.weeks.forEach(function (w) {
       w.sessions.forEach(function (ses) {
         var content = ses.lines.slice();
         if (ses.focus) content.push(ses.focus);
+        if (ses.adapt) content.push(ses.adapt);
+        var l = getLog(ses) || {};
         rows.push([
           "S" + w.n, PHASE_META[w.phase].label + (w.deload ? " (décharge)" : ""),
           toISO(ses.date), DAYS[(ses.date.getDay() + 6) % 7],
-          ses.title, FAM_LABEL[ses.family], ses.kind, ses.dur, content.join(" | ")
+          ses.title, FAM_LABEL[ses.family], ses.kind, ses.dur, content.join(" | "),
+          l.status ? STATUS_LABEL[l.status] : "", l.rpe || "", l.note || ""
         ]);
       });
     });
     return csv(rows);
+  }
+
+  function icsEscape(v) { return String(v).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n"); }
+  function icsFold(line) {
+    var out = [], s = line;
+    while (s.length > 72) { out.push(s.slice(0, 72)); s = " " + s.slice(72); }
+    out.push(s);
+    return out.join("\r\n");
+  }
+  function planICS() {
+    var s = state, R = s.R;
+    var stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    var lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Roxzone//Plan Hyrox//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+      "X-WR-CALNAME:Roxzone — HYROX " + toISO(s.cfg.raceDate)];
+    s.plan.weeks.forEach(function (w) {
+      w.sessions.forEach(function (ses) {
+        var d = detailSession(ses, R);
+        var desc = [];
+        if (d.warm.length) desc.push("ÉCHAUFFEMENT", d.warm.map(function (l) { return "- " + l; }).join("\n"), "");
+        desc.push(ses.race ? "LA COURSE" : "SÉANCE", d.main.map(function (l) { return "- " + l; }).join("\n"));
+        if (ses.focus) desc.push("- " + ses.focus);
+        if (ses.adapt) desc.push("- " + ses.adapt);
+        if (d.cool.length) desc.push("", "RETOUR AU CALME", d.cool.map(function (l) { return "- " + l; }).join("\n"));
+        desc.push("", "Semaine S" + w.n + " · " + PHASE_META[w.phase].label + (w.deload ? " (décharge)" : ""), "https://hyroxplan.github.io/roxzone/");
+        var end = addDays(ses.date, 1);
+        lines.push("BEGIN:VEVENT",
+          "UID:" + toISO(ses.date) + "-" + ses.type + "@roxzone",
+          "DTSTAMP:" + stamp,
+          "DTSTART;VALUE=DATE:" + toISO(ses.date).replace(/-/g, ""),
+          "DTEND;VALUE=DATE:" + toISO(end).replace(/-/g, ""),
+          icsFold("SUMMARY:" + icsEscape((ses.race ? "🏁 " : "🏃 ") + ses.title + " · " + ses.dur + " min")),
+          icsFold("DESCRIPTION:" + icsEscape(desc.join("\n"))),
+          "CATEGORIES:Roxzone",
+          "END:VEVENT");
+      });
+    });
+    lines.push("END:VCALENDAR");
+    return lines.join("\r\n") + "\r\n";
   }
 
   function splitsCSV() {
@@ -1392,12 +1898,13 @@
   function wireDownloads(dl) {
     var bPlan = document.getElementById("dl-plan");
     var bSplits = document.getElementById("dl-splits");
-    bPlan.hidden = false; bSplits.hidden = false;
+    var bIcs = document.getElementById("dl-ics");
+    bPlan.hidden = false; bSplits.hidden = false; bIcs.hidden = false;
 
-    function save(btn, name, make) {
+    function save(btn, name, make, mime) {
       btn.addEventListener("click", function () {
         note.textContent = "";
-        dl.save({ filename:name(), data:make() }).then(function () {
+        dl.save({ filename:name(), data:make(), mime:mime || "text/csv;charset=utf-8" }).then(function () {
           note.textContent = "Fichier enregistré.";
         }).catch(function (e) {
           var c = e && e.code;
@@ -1409,6 +1916,7 @@
     }
     save(bPlan, function () { return "plan-hyrox-" + toISO(state.cfg.raceDate) + ".csv"; }, planCSV);
     save(bSplits, function () { return "allures-hyrox-" + hms(state.R.total).replace(/:/g, "h") + ".csv"; }, splitsCSV);
+    save(bIcs, function () { return "roxzone-hyrox-" + toISO(state.cfg.raceDate) + ".ics"; }, planICS, "text/calendar;charset=utf-8");
   }
 
   /* ============ démarrage ============ */
@@ -1432,6 +1940,7 @@
   var dateInput = document.getElementById("race-date");
   dateInput.value = toISO(defaultRaceDate());
   dateInput.min = toISO(new Date());
+  var restored = restoreConfig();
 
   document.getElementById("goal").addEventListener("input", function () { goalTouched = true; });
   document.getElementById("params").addEventListener("input", function (e) {
@@ -1441,14 +1950,69 @@
   document.getElementById("params").addEventListener("change", function () { render(); });
   document.getElementById("params").addEventListener("submit", function (e) { e.preventDefault(); });
 
-  syncGoalToLevel();
+  if (!restored) syncGoalToLevel();
   render();
+
+  /* ============ mentions légales, données, installation ============ */
+
+  var legal = document.getElementById("legal");
+  document.getElementById("open-legal").addEventListener("click", function () {
+    if (legal.showModal) legal.showModal(); else legal.setAttribute("open", "");
+  });
+  document.getElementById("close-legal").addEventListener("click", function () { legal.close ? legal.close() : legal.removeAttribute("open"); });
+  legal.addEventListener("click", function (e) { if (e.target === legal && legal.close) legal.close(); });
+
+  document.getElementById("reset-data").addEventListener("click", function () {
+    if (!window.confirm("Effacer tes paramètres et ton journal de cet appareil ?")) return;
+    try { localStorage.removeItem(JKEY); localStorage.removeItem(CKEY); } catch (e) {}
+    journal = {};
+    goalTouched = false;
+    dateInput.value = toISO(defaultRaceDate());
+    syncGoalToLevel();
+    render();
+    note.textContent = "Données effacées.";
+  });
+
+  (function install() {
+    var bar = document.getElementById("install"), btn = document.getElementById("install-btn"), txt = document.getElementById("install-text");
+    var standalone = (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+    var dismissed = null;
+    try { dismissed = localStorage.getItem("roxzone-install-dismissed"); } catch (e) {}
+    if (standalone || dismissed) return;
+    var ua = navigator.userAgent || "";
+    var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    document.getElementById("install-x").addEventListener("click", function () {
+      bar.hidden = true;
+      try { localStorage.setItem("roxzone-install-dismissed", "1"); } catch (e) {}
+    });
+    if (isIOS) {
+      txt.innerHTML = "<b>Installe Roxzone sur ton iPhone</b> — dans Safari, touche le bouton Partager (carré avec une flèche) puis « Sur l'écran d'accueil ». L'app s'ouvre en plein écran et fonctionne hors ligne.";
+      bar.hidden = false;
+      return;
+    }
+    var deferred = null;
+    window.addEventListener("beforeinstallprompt", function (e) {
+      e.preventDefault(); deferred = e;
+      btn.hidden = false; bar.hidden = false;
+    });
+    btn.addEventListener("click", function () {
+      if (!deferred) return;
+      deferred.prompt();
+      deferred.userChoice.then(function () { bar.hidden = true; deferred = null; });
+    });
+  })();
+
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () {});
+    });
+  }
 
   wireDownloads({
     save: function (req) {
       return new Promise(function (resolve, reject) {
         try {
-          var blob = new Blob([req.data], { type: "text/csv;charset=utf-8" });
+          var blob = new Blob([req.data], { type: req.mime || "text/csv;charset=utf-8" });
           var url = URL.createObjectURL(blob);
           var a = document.createElement("a");
           a.href = url; a.download = req.filename; a.style.display = "none";
