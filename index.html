@@ -694,8 +694,8 @@
     .tabbar { display: flex; }
     body { padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
     body[data-tab] .hero, body[data-tab] .rail, body[data-tab] main > section, body[data-tab] .colophon, body[data-tab] #warn, body[data-tab] #adapt-warn { display: none; }
-    body[data-tab="today"] #sec-today, body[data-tab="today"] #adapt-warn, body[data-tab="today"] #warn { display: block; }
-    body[data-tab="plan"] #sec-periodisation, body[data-tab="plan"] #sec-plan, body[data-tab="plan"] #sec-nutrition { display: block; }
+    body[data-tab="today"] #sec-today, body[data-tab="today"] #sec-nutrition, body[data-tab="today"] #adapt-warn, body[data-tab="today"] #warn { display: block; }
+    body[data-tab="plan"] #sec-periodisation, body[data-tab="plan"] #sec-plan { display: block; }
     body[data-tab="allures"] #sec-splits, body[data-tab="allures"] #sec-stations, body[data-tab="allures"] #sec-race-nutrition { display: block; }
     body[data-tab="reglages"] .hero, body[data-tab="reglages"] .rail, body[data-tab="reglages"] .colophon, body[data-tab="reglages"] #warn { display: block; }
     body[data-tab]:not([data-tab="reglages"]) .cols { margin-top: 22px; }
@@ -849,6 +849,15 @@
         <div class="today" id="today"></div>
       </section>
 
+      <section id="sec-nutrition">
+        <div class="sec-head">
+          <h2>Nutrition de la semaine</h2>
+          <p class="note" id="nutri-note"></p>
+        </div>
+        <div class="nutri-card" id="nutri-week"></div>
+      </section>
+
+
       <section id="sec-periodisation">
         <div class="sec-head">
           <h2>Périodisation</h2>
@@ -911,14 +920,6 @@
         <div class="weeks" id="weeks"></div>
       </section>
 
-      <section id="sec-nutrition">
-        <div class="sec-head">
-          <h2>Nutrition de la semaine</h2>
-          <p class="note" id="nutri-note"></p>
-        </div>
-        <div class="nutri-card" id="nutri-week"></div>
-      </section>
-
       <section id="sec-stations">
         <div class="sec-head">
           <h2>Barème des stations</h2>
@@ -943,7 +944,7 @@
         <div class="legal-links">
           <button type="button" id="open-legal">Mentions légales &amp; confidentialité</button>
           <button type="button" id="reset-data">Effacer mes données</button>
-          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.3</span>
+          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.3.1</span>
         </div>
       </div>
     </main>
@@ -1845,7 +1846,7 @@
       blockHTML("Retour au calme", d.cool) + "</div>";
     var nu = nutriSession(s, state.cfg);
     if (nu) {
-      html += '<details class="nutri"><summary>Nutrition de la séance</summary><div class="blocks" style="margin-top:10px">' +
+      html += '<details class="nutri" open><summary>Nutrition de la séance</summary><div class="blocks" style="margin-top:10px">' +
         blockHTML("Avant", nu.before, "", "nu") + blockHTML("Pendant", nu.during, "", "nu") + blockHTML("Après", nu.after, "", "nu") + "</div>" +
         (state.cfg.weight ? "" : '<p class="nu-hint">Renseigne ton poids dans les réglages pour des quantités en grammes.</p>') + "</details>";
     } else if (s.race) {
@@ -1907,7 +1908,13 @@
         (cur.race ? "" : '<button type="button" class="start-btn" id="start-session" data-k="' + esc(skey(cur)) + '">Démarrer la séance</button>') +
         prog + "</div>" + (cur.race ? "" : logHTML(cur));
     } else {
+      var restNu = [
+        "Jour de repos : garde les protéines (" + gk(cfg, 1.6, 2.0) + " sur la journée, en 3–4 prises) pour la reconstruction musculaire.",
+        "Baisse un peu les féculents par rapport à un jour de séance, sans les supprimer ; fais la part belle aux légumes, fruits et bonnes graisses.",
+        "Hydratation normale (" + mlk(cfg, 30, 35) + "), et si tu as une séance dure demain, un dîner riche en glucides ce soir."
+      ];
       body = '<div class="rest"><h3>Repos aujourd\'hui</h3><p>Le repos fait partie du plan : sommeil, hydratation, marche ou mobilité légère.</p>' +
+        '<div class="blocks" style="margin-top:12px">' + blockHTML("Nutrition du jour de repos", restNu, "", "nu") + "</div>" +
         (next ? '<p class="next">Prochaine séance : <b>' + esc(dayLabel(next.date)) + "</b> — " + esc(next.title) + " (" + next.dur + " min)</p>" +
           '<details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;font-weight:600">Voir le détail de la prochaine séance</summary><div style="margin-top:10px">' + sessionDetailHTML(next, R) + "</div></details>" : "") +
         prog + "</div>";
