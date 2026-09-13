@@ -599,8 +599,86 @@
   .legal-body p { margin: 0 0 8px; color: var(--ink-2); }
   .legal-body strong { color: var(--ink); }
 
+  /* ---------- barre d'onglets (mobile) ---------- */
+  .tabbar {
+    display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    background: var(--surface); border-top: 1px solid var(--rule);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .tabbar button {
+    flex: 1; background: none; border: 0; cursor: pointer; padding: 10px 4px 9px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3); display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .tabbar button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .tabbar button.on { color: var(--accent); }
+  .tabbar button .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); position: absolute; margin-left: 26px; margin-top: -2px; }
+
+  /* ---------- mode séance ---------- */
+  .start-btn {
+    width: 100%; margin-top: 14px; cursor: pointer;
+    font-family: var(--display); font-variation-settings: "wdth" 108, "wght" 750;
+    font-size: 15px; text-transform: uppercase; letter-spacing: .06em;
+    background: var(--accent); color: var(--accent-on); border: 0; border-radius: 4px; padding: 13px 16px;
+  }
+  .start-btn:hover { background: var(--accent-2); }
+  .smode {
+    position: fixed; inset: 0; z-index: 60; background: var(--paper); color: var(--ink);
+    display: flex; flex-direction: column;
+    padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+  }
+  .smode[hidden] { display: none; }
+  .smode-head {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    background: var(--ink); color: var(--paper);
+  }
+  .smode-head .st { font-family: var(--display); font-variation-settings: "wdth" 108, "wght" 750; text-transform: uppercase; letter-spacing: .04em; font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .smode-head .tot { font-family: var(--mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+  .smode-head button { background: none; border: 0; color: var(--paper); font-size: 24px; line-height: 1; cursor: pointer; opacity: .8; }
+  .smode-body { flex: 1; overflow: auto; padding: 22px 20px; display: flex; flex-direction: column; gap: 10px; max-width: 720px; width: 100%; margin: 0 auto; }
+  .sm-phase { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+  .sm-idx { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+  .sm-text {
+    font-family: var(--display); font-variation-settings: "wdth" 100, "wght" 700;
+    font-size: clamp(22px, 5.5vw, 34px); line-height: 1.12; letter-spacing: -.015em; margin: 6px 0 12px; text-wrap: balance;
+  }
+  .sm-step {
+    font-family: var(--display); font-variation-settings: "wdth" 90, "wght" 800;
+    font-size: clamp(56px, 18vw, 96px); line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums;
+    color: var(--ink); margin: 6px 0 4px;
+  }
+  .sm-step small { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); display: block; margin-top: 6px; font-weight: 400; }
+  .sm-laps { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sm-laps span { font-family: var(--mono); font-size: 12px; padding: 4px 8px; border: 1px solid var(--rule); border-radius: 2px; background: var(--surface); font-variant-numeric: tabular-nums; }
+  .sm-paces { margin-top: auto; }
+  .smode-foot { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 8px; padding: 12px 16px 14px; border-top: 1px solid var(--rule); background: var(--surface); }
+  .smode-foot button {
+    font-family: var(--body); font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 4px; padding: 14px 8px;
+    border: 1px solid var(--rule); background: var(--surface-2); color: var(--ink);
+  }
+  .smode-foot button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-on); }
+  .smode-foot button:disabled { opacity: .4; cursor: default; }
+  .smode-end { padding: 22px 20px; max-width: 720px; width: 100%; margin: 0 auto; overflow: auto; flex: 1; }
+  .smode-end h3 { font-family: var(--display); font-variation-settings: "wdth" 104, "wght" 800; font-size: 28px; margin: 0 0 4px; letter-spacing: -.02em; }
+  .smode-end .sum { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); margin-bottom: 18px; }
+  .smode-end .lbl { font-size: 12px; font-weight: 600; margin: 14px 0 7px; display: flex; justify-content: space-between; }
+  .smode-end textarea { width: 100%; min-height: 70px; font-family: var(--body); font-size: 13px; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 8px 9px; }
+  .smode-end .check { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 12px; }
+  .smode-end .check input { accent-color: var(--accent); width: 16px; height: 16px; }
+  .smode-end .start-btn { margin-top: 20px; }
+
   @media (max-width: 980px) {
-    .cols { grid-template-columns: 1fr; gap: 26px; }
+    .tabbar { display: flex; }
+    body { padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
+    body[data-tab] .hero, body[data-tab] .rail, body[data-tab] main > section, body[data-tab] .colophon, body[data-tab] #warn, body[data-tab] #adapt-warn { display: none; }
+    body[data-tab="today"] #sec-today, body[data-tab="today"] #adapt-warn, body[data-tab="today"] #warn { display: block; }
+    body[data-tab="plan"] #sec-periodisation, body[data-tab="plan"] #sec-plan { display: block; }
+    body[data-tab="allures"] #sec-splits, body[data-tab="allures"] #sec-stations { display: block; }
+    body[data-tab="reglages"] .hero, body[data-tab="reglages"] .rail, body[data-tab="reglages"] .colophon, body[data-tab="reglages"] #warn { display: block; }
+    body[data-tab]:not([data-tab="reglages"]) .cols { margin-top: 22px; }
+    body[data-tab] .masthead p { display: none; }
+    .cols { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+    .cols > main { min-width: 0; }
     .rail { position: static; }
     .stations { grid-template-columns: repeat(2, 1fr); }
   }
@@ -712,6 +790,16 @@
         </select>
       </label>
 
+      <label class="field" for="remind">
+        <span class="lbl">Rappel calendrier <span class="hint">fichier ICS</span></span>
+        <select id="remind">
+          <option value="both">Veille 20 h + matin 7 h</option>
+          <option value="eve">La veille à 20 h</option>
+          <option value="morn">Le matin à 7 h</option>
+          <option value="none">Aucun rappel</option>
+        </select>
+      </label>
+
       <div class="rail-foot">
         <button type="button" class="btn" id="dl-ics" hidden>Ajouter au calendrier <span class="ext">ICS</span></button>
         <button type="button" class="btn" id="dl-plan" hidden>Télécharger le plan <span class="ext">CSV</span></button>
@@ -811,10 +899,49 @@
         <div class="legal-links">
           <button type="button" id="open-legal">Mentions légales &amp; confidentialité</button>
           <button type="button" id="reset-data">Effacer mes données</button>
-          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.1</span>
+          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.2</span>
         </div>
       </div>
     </main>
+  </div>
+</div>
+
+<nav class="tabbar" id="tabbar" aria-label="Navigation">
+  <button type="button" data-tab="today"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Aujourd'hui</button>
+  <button type="button" data-tab="plan"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>Plan</button>
+  <button type="button" data-tab="allures"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Allures</button>
+  <button type="button" data-tab="reglages"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Réglages</button>
+</nav>
+
+<div class="smode" id="smode" hidden role="dialog" aria-modal="true" aria-label="Mode séance">
+  <div class="smode-head">
+    <span class="st" id="sm-title"></span>
+    <span class="tot" id="sm-total">0:00</span>
+    <button type="button" id="sm-close" aria-label="Quitter">×</button>
+  </div>
+  <div class="smode-body" id="sm-body">
+    <div class="sm-phase" id="sm-phase"></div>
+    <div class="sm-idx" id="sm-idx"></div>
+    <div class="sm-text" id="sm-text"></div>
+    <div class="sm-step" id="sm-step">0:00<small>chrono de l'étape</small></div>
+    <div class="sm-laps" id="sm-laps"></div>
+    <div class="paces sm-paces" id="sm-paces"></div>
+  </div>
+  <div class="smode-foot" id="sm-foot">
+    <button type="button" id="sm-prev">Précédent</button>
+    <button type="button" id="sm-lap">Tour</button>
+    <button type="button" id="sm-next" class="primary">Suivant</button>
+  </div>
+  <div class="smode-end" id="sm-end" hidden>
+    <h3>Séance terminée</h3>
+    <div class="sum" id="sm-sum"></div>
+    <div class="lbl">Ressenti (RPE) <span class="rpe-read" id="sm-rpe-read">6/10</span></div>
+    <input type="range" id="sm-rpe" min="1" max="10" step="1" value="6" aria-label="RPE">
+    <div class="lbl">Notes</div>
+    <textarea id="sm-note" placeholder="Sensations, conditions, matériel…"></textarea>
+    <label class="check"><input type="checkbox" id="sm-pain"> J'ai ressenti une douleur</label>
+    <button type="button" class="start-btn" id="sm-save">Enregistrer la séance</button>
+    <button type="button" class="btn" id="sm-partial" style="margin-top:8px;width:100%;justify-content:center">Enregistrer comme partielle</button>
   </div>
 </div>
 
@@ -1606,7 +1733,9 @@
     } else if (cur) {
       body = '<div class="today-body"><h3 class="today-title"><i class="fam fam-' + cur.family + '"></i>' + esc(cur.title) + "</h3>" +
         '<div class="today-sub">' + esc(FAM_LABEL[cur.family]) + " · " + esc(cur.kind) + " · " + (cur.race ? "~" : "") + cur.dur + " min</div>" +
-        sessionDetailHTML(cur, R) + prog + "</div>" + (cur.race ? "" : logHTML(cur));
+        sessionDetailHTML(cur, R) +
+        (cur.race ? "" : '<button type="button" class="start-btn" id="start-session" data-k="' + esc(skey(cur)) + '">Démarrer la séance</button>') +
+        prog + "</div>" + (cur.race ? "" : logHTML(cur));
     } else {
       body = '<div class="rest"><h3>Repos aujourd\'hui</h3><p>Le repos fait partie du plan : sommeil, hydratation, marche ou mobilité légère.</p>' +
         (next ? '<p class="next">Prochaine séance : <b>' + esc(dayLabel(next.date)) + "</b> — " + esc(next.title) + " (" + next.dur + " min)</p>" +
@@ -1682,6 +1811,7 @@
     var division = f.division.value, sex = f.sex.value, level = f.level.value;
     var freq = parseInt(f.freq.value, 10);
     var weak = document.getElementById("weak").value;
+    var remind = document.getElementById("remind").value;
     var goal = parseInt(document.getElementById("goal").value, 10);
 
     var raceStr = document.getElementById("race-date").value;
@@ -1710,10 +1840,10 @@
 
     var loadKey = (division === "pro" ? "pro" : "open") + "_" + sex;
 
-    saveJSON(CKEY, { date:raceStr, planStart:toISO(monStart), division:division, sex:sex, level:level, freq:freq, weak:weak, goal:goal, goalTouched:goalTouched });
+    saveJSON(CKEY, { date:raceStr, planStart:toISO(monStart), division:division, sex:sex, level:level, freq:freq, weak:weak, remind:remind, goal:goal, goalTouched:goalTouched });
 
     return {
-      division:division, sex:sex, level:level, freq:freq, weak:weak, goal:goal,
+      division:division, sex:sex, level:level, freq:freq, weak:weak, remind:remind, goal:goal,
       raceDate:raceDate, daysLeft:daysLeft, today:today,
       weeks:clamped, rawWeeks:weeks,
       firstMonday:addDays(monRace, -(clamped - 1) * 7),
@@ -1732,6 +1862,7 @@
       if (c.level) f.level.value = c.level;
       if (c.freq) f.freq.value = String(c.freq);
       if (c.weak) document.getElementById("weak").value = c.weak;
+      if (c.remind) document.getElementById("remind").value = c.remind;
       if (c.goalTouched && c.goal) { document.getElementById("goal").value = c.goal; goalTouched = true; }
     } catch (e) { return false; }
     return true;
@@ -1807,6 +1938,140 @@
   document.getElementById("today").addEventListener("change", function (e) {
     if (e.target.id === "log-rpe") render();
   });
+  /* ============ onglets (mobile) ============ */
+
+  var tabbar = document.getElementById("tabbar");
+  function setTab(name, scroll) {
+    document.body.setAttribute("data-tab", name);
+    Array.prototype.forEach.call(tabbar.querySelectorAll("button"), function (b) {
+      b.classList.toggle("on", b.dataset.tab === name);
+    });
+    if (scroll) window.scrollTo(0, 0);
+  }
+  tabbar.addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-tab]");
+    if (b) setTab(b.dataset.tab, true);
+  });
+
+  /* ============ mode séance ============ */
+
+  var SM = null; // état du mode séance
+  var smEl = {
+    root: document.getElementById("smode"), title: document.getElementById("sm-title"), total: document.getElementById("sm-total"),
+    body: document.getElementById("sm-body"), phase: document.getElementById("sm-phase"), idx: document.getElementById("sm-idx"),
+    text: document.getElementById("sm-text"), step: document.getElementById("sm-step"), laps: document.getElementById("sm-laps"),
+    paces: document.getElementById("sm-paces"), foot: document.getElementById("sm-foot"), end: document.getElementById("sm-end"),
+    prev: document.getElementById("sm-prev"), next: document.getElementById("sm-next"), lap: document.getElementById("sm-lap"),
+    sum: document.getElementById("sm-sum"), rpe: document.getElementById("sm-rpe"), rpeRead: document.getElementById("sm-rpe-read"),
+    note: document.getElementById("sm-note"), pain: document.getElementById("sm-pain")
+  };
+  var wakeLock = null;
+  function keepAwake(on) {
+    try {
+      if (on && navigator.wakeLock) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }).catch(function () {});
+      else if (!on && wakeLock) { wakeLock.release(); wakeLock = null; }
+    } catch (e) {}
+  }
+  function startSession(s) {
+    var R = state.R, d = detailSession(s, R), steps = [];
+    d.warm.forEach(function (t) { steps.push({ phase:"Échauffement", text:t }); });
+    d.main.forEach(function (t) { steps.push({ phase:"Corps de séance", text:t }); });
+    if (s.focus) steps.push({ phase:"Corps de séance · focus", text:s.focus });
+    if (s.adapt) steps.push({ phase:"Adaptation", text:s.adapt });
+    d.cool.forEach(function (t) { steps.push({ phase:"Retour au calme", text:t }); });
+    var now = Date.now();
+    SM = { s:s, steps:steps, i:0, t0:now, stepT0:now, laps:{}, timer:null };
+    var l = getLog(s) || {};
+    smEl.rpe.value = l.rpe || 6; smEl.rpeRead.textContent = smEl.rpe.value + "/10";
+    smEl.note.value = l.note || ""; smEl.pain.checked = !!l.pain;
+    smEl.title.textContent = s.title;
+    smEl.paces.innerHTML = (s.family === "run" || s.family === "hyrox")
+      ? '<span class="pace">Course <b>' + pace(R.cible) + '</b></span><span class="pace">Seuil <b>' + pace(R.seuil) + '</b></span><span class="pace">VMA <b>' + pace(R.vma) + '</b></span><span class="pace">Endurance <b>' + pace(R.facile) + "</b></span>"
+      : "";
+    smEl.end.hidden = true; smEl.body.hidden = false; smEl.foot.hidden = false;
+    smEl.root.hidden = false;
+    document.body.style.overflow = "hidden";
+    keepAwake(true);
+    smRenderStep();
+    SM.timer = setInterval(smTick, 250);
+  }
+  function smTick() {
+    if (!SM) return;
+    var now = Date.now();
+    smEl.total.textContent = hms(Math.floor((now - SM.t0) / 1000));
+    smEl.step.firstChild.nodeValue = ms(Math.floor((now - SM.stepT0) / 1000));
+  }
+  function smRenderStep() {
+    var st = SM.steps[SM.i];
+    smEl.phase.textContent = st.phase;
+    smEl.idx.textContent = "Étape " + (SM.i + 1) + " / " + SM.steps.length;
+    smEl.text.textContent = st.text;
+    smEl.prev.disabled = SM.i === 0;
+    smEl.next.textContent = SM.i === SM.steps.length - 1 ? "Terminer" : "Suivant";
+    smRenderLaps();
+    smTick();
+  }
+  function smRenderLaps() {
+    var laps = SM.laps[SM.i] || [];
+    smEl.laps.innerHTML = laps.map(function (t, k) { return "<span>T" + (k + 1) + " · " + ms(t) + "</span>"; }).join("");
+  }
+  function smGoto(i) {
+    if (i < 0 || i >= SM.steps.length) return;
+    SM.i = i; SM.stepT0 = Date.now();
+    smRenderStep();
+    smEl.body.scrollTop = 0;
+  }
+  function smFinish() {
+    clearInterval(SM.timer); SM.timer = null;
+    var total = Math.floor((Date.now() - SM.t0) / 1000);
+    var lapTxt = [];
+    Object.keys(SM.laps).forEach(function (k) {
+      var laps = SM.laps[k]; if (!laps.length) return;
+      lapTxt.push("Étape " + (parseInt(k, 10) + 1) + " : " + laps.map(ms).join(", "));
+    });
+    SM.total = total; SM.lapTxt = lapTxt;
+    smEl.sum.textContent = "Durée " + hms(total) + (lapTxt.length ? " · " + lapTxt.join(" · ") : "");
+    smEl.body.hidden = true; smEl.foot.hidden = true; smEl.end.hidden = false;
+  }
+  function smSave(status) {
+    var note = smEl.note.value.trim();
+    var stamp = "Séance chronométrée " + hms(SM.total) + (SM.lapTxt.length ? " — " + SM.lapTxt.join(" · ") : "");
+    if (note.indexOf(stamp) < 0) note = (note ? note + "\n" : "") + stamp;
+    setLog(SM.s, { status:status, rpe:parseInt(smEl.rpe.value, 10), note:note, pain:smEl.pain.checked });
+    smClose();
+    render();
+  }
+  function smClose() {
+    if (SM && SM.timer) clearInterval(SM.timer);
+    SM = null;
+    smEl.root.hidden = true;
+    document.body.style.overflow = "";
+    keepAwake(false);
+  }
+  smEl.prev.addEventListener("click", function () { smGoto(SM.i - 1); });
+  smEl.next.addEventListener("click", function () { if (SM.i === SM.steps.length - 1) smFinish(); else smGoto(SM.i + 1); });
+  smEl.lap.addEventListener("click", function () {
+    var now = Date.now();
+    (SM.laps[SM.i] = SM.laps[SM.i] || []).push(Math.floor((now - SM.stepT0) / 1000));
+    SM.stepT0 = now;
+    smRenderLaps();
+    if (navigator.vibrate) navigator.vibrate(30);
+  });
+  document.getElementById("sm-close").addEventListener("click", function () {
+    if (!SM) return;
+    if (smEl.end.hidden && !window.confirm("Quitter la séance sans l'enregistrer ?")) return;
+    smClose();
+  });
+  smEl.rpe.addEventListener("input", function () { smEl.rpeRead.textContent = smEl.rpe.value + "/10"; });
+  document.getElementById("sm-save").addEventListener("click", function () { smSave("done"); });
+  document.getElementById("sm-partial").addEventListener("click", function () { smSave("partial"); });
+  document.getElementById("today").addEventListener("click", function (e) {
+    var b = e.target.closest("#start-session");
+    if (!b) return;
+    var s = findSession(b.dataset.k);
+    if (s) startSession(s);
+  });
+
   el.weeks.addEventListener("click", function (e) {
     var b = e.target.closest(".ses-log .mini");
     if (!b) return;
@@ -1869,6 +2134,12 @@
         if (d.cool.length) desc.push("", "RETOUR AU CALME", d.cool.map(function (l) { return "- " + l; }).join("\n"));
         desc.push("", "Semaine S" + w.n + " · " + PHASE_META[w.phase].label + (w.deload ? " (décharge)" : ""), "https://hyroxplan.github.io/roxzone/");
         var end = addDays(ses.date, 1);
+        var label = ses.title + " (" + ses.dur + " min)";
+        var alarms = [];
+        var rm = s.cfg.remind || "both";
+        // Événement « journée entière » : le déclencheur est relatif à minuit.
+        if (rm === "both" || rm === "eve") alarms.push("BEGIN:VALARM", "ACTION:DISPLAY", icsFold("DESCRIPTION:" + icsEscape("Demain : " + label + (ses.race ? " — prépare ton sac !" : ""))), "TRIGGER:-PT4H", "END:VALARM");
+        if (rm === "both" || rm === "morn") alarms.push("BEGIN:VALARM", "ACTION:DISPLAY", icsFold("DESCRIPTION:" + icsEscape((ses.race ? "C'est le jour J : " : "Aujourd'hui : ") + label)), "TRIGGER:PT7H", "END:VALARM");
         lines.push("BEGIN:VEVENT",
           "UID:" + toISO(ses.date) + "-" + ses.type + "@roxzone",
           "DTSTAMP:" + stamp,
@@ -1876,8 +2147,9 @@
           "DTEND;VALUE=DATE:" + toISO(end).replace(/-/g, ""),
           icsFold("SUMMARY:" + icsEscape((ses.race ? "🏁 " : "🏃 ") + ses.title + " · " + ses.dur + " min")),
           icsFold("DESCRIPTION:" + icsEscape(desc.join("\n"))),
-          "CATEGORIES:Roxzone",
-          "END:VEVENT");
+          "CATEGORIES:Roxzone");
+        lines.push.apply(lines, alarms);
+        lines.push("END:VEVENT");
       });
     });
     lines.push("END:VCALENDAR");
@@ -1952,6 +2224,9 @@
 
   if (!restored) syncGoalToLevel();
   render();
+  (function () {
+    setTab(restored ? "today" : "reglages", false);
+  })();
 
   /* ============ mentions légales, données, installation ============ */
 
@@ -1970,6 +2245,7 @@
     dateInput.value = toISO(defaultRaceDate());
     syncGoalToLevel();
     render();
+    setTab("reglages", false);
     note.textContent = "Données effacées.";
   });
 
