@@ -1,6 +1,6 @@
 /* Roxzone — service worker : application utilisable hors ligne.
    Incrémenter VERSION à chaque déploiement pour invalider le cache. */
-var VERSION = "roxzone-2026-09-13d";
+var VERSION = "roxzone-2026-09-13e";
 var SHELL = [
   "./",
   "./index.html",

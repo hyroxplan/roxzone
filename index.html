@@ -622,6 +622,16 @@
   .nutri-foot { font-size: 11.5px; color: var(--ink-3); margin: 14px 0 0; padding-top: 10px; border-top: 1px solid var(--rule-soft); }
   @media (max-width: 700px) { .nutri-grid { grid-template-columns: 1fr 1fr; } }
 
+  /* ---------- sommeil ---------- */
+  .sleep-log { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 3px; background: var(--surface-2); margin-bottom: 14px; }
+  .sleep-log .lbl { font-size: 12px; font-weight: 600; margin-bottom: 7px; display: flex; justify-content: space-between; }
+  .sleep-log .qual { display: flex; gap: 3px; background: var(--surface); border: 1px solid var(--rule); border-radius: 3px; padding: 3px; }
+  .sleep-log .qual button { flex: 1; font-family: var(--body); font-size: 12.5px; cursor: pointer; padding: 7px 4px; border: 0; border-radius: 2px; background: transparent; color: var(--ink-2); }
+  .sleep-log .qual button.on { background: var(--ink); color: var(--paper); font-weight: 600; }
+  .sleep-stat { font-family: var(--mono); font-size: 11px; color: var(--ink-3); grid-column: 1 / -1; }
+  .sleep-stat b { color: var(--ink); font-weight: 600; }
+  @media (max-width: 700px) { .sleep-log { grid-template-columns: 1fr; } }
+
   /* ---------- barre d'onglets (mobile) ---------- */
   .tabbar {
     display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
@@ -694,7 +704,7 @@
     .tabbar { display: flex; }
     body { padding-bottom: calc(66px + env(safe-area-inset-bottom)); }
     body[data-tab] .hero, body[data-tab] .rail, body[data-tab] main > section, body[data-tab] .colophon, body[data-tab] #warn, body[data-tab] #adapt-warn { display: none; }
-    body[data-tab="today"] #sec-today, body[data-tab="today"] #sec-nutrition, body[data-tab="today"] #adapt-warn, body[data-tab="today"] #warn { display: block; }
+    body[data-tab="today"] #sec-today, body[data-tab="today"] #sec-nutrition, body[data-tab="today"] #sec-sleep, body[data-tab="today"] #adapt-warn, body[data-tab="today"] #warn { display: block; }
     body[data-tab="plan"] #sec-periodisation, body[data-tab="plan"] #sec-plan { display: block; }
     body[data-tab="allures"] #sec-splits, body[data-tab="allures"] #sec-stations, body[data-tab="allures"] #sec-race-nutrition { display: block; }
     body[data-tab="reglages"] .hero, body[data-tab="reglages"] .rail, body[data-tab="reglages"] .colophon, body[data-tab="reglages"] #warn { display: block; }
@@ -857,6 +867,14 @@
         <div class="nutri-card" id="nutri-week"></div>
       </section>
 
+      <section id="sec-sleep">
+        <div class="sec-head">
+          <h2>Sommeil</h2>
+          <p class="note" id="sleep-note"></p>
+        </div>
+        <div class="nutri-card" id="sleep-card"></div>
+      </section>
+
 
       <section id="sec-periodisation">
         <div class="sec-head">
@@ -944,7 +962,7 @@
         <div class="legal-links">
           <button type="button" id="open-legal">Mentions légales &amp; confidentialité</button>
           <button type="button" id="reset-data">Effacer mes données</button>
-          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.3.1</span>
+          <span id="version" style="font-family:var(--mono);font-size:11px;color:var(--ink-3)">v1.4</span>
         </div>
       </div>
     </main>
@@ -1675,7 +1693,18 @@
       msgs.push("Tu as signalé une douleur. Les séances de course des 7 prochains jours sont à remplacer par du vélo ou du rameur souple. Si la douleur dure plus de 5 jours, augmente ou t'oblige à modifier ta foulée, consulte un professionnel de santé.");
     }
 
-    // 4. Séance manquée hier
+    // 4. Nuits courtes
+    var sl = sleepStats(today, 3);
+    if (sl && sl.n >= 2 && sl.mean < 6) {
+      ws.forEach(function (w) { w.sessions.forEach(function (s) {
+        if (!s.race && sameDay(s.date, today) && (s.type === "qrun" || s.type === "hyrox" || s.type === "stations")) {
+          s.adapt = (s.adapt ? s.adapt + " " : "") + "Nuits courtes (" + fr(sl.mean) + " h en moyenne) : garde la séance mais baisse l'intensité d'un cran — pas de record aujourd'hui, allures +5 s/km.";
+        }
+      }); });
+      msgs.push("Tu dors " + fr(sl.mean) + " h par nuit en moyenne ces derniers jours : la qualité du jour est adoucie. Priorité au coucher ce soir.");
+    }
+
+    // 5. Séance manquée hier
     var y = logs(addDays(today, -2), addDays(today, -1)).filter(function (x) { return x.l.status === "missed"; });
     if (y.length && !pain.length) {
       msgs.push("Séance manquée récemment : ne la rattrape pas en doublant, poursuis simplement le plan.");
@@ -1945,6 +1974,95 @@
       '<p class="nutri-foot">' + esc(NUTRI_DISCLAIMER) + "</p>";
   }
 
+
+  /* ============ sommeil ============ */
+
+  function sleepKey(d) { return "sleep|" + toISO(d); }
+  function getSleep(d) { return journal[sleepKey(d)] || null; }
+  function setSleep(d, patch) {
+    var k = sleepKey(d), cur = journal[k] || {};
+    Object.keys(patch).forEach(function (p) { cur[p] = patch[p]; });
+    cur.ts = Date.now(); journal[k] = cur; saveJSON(JKEY, journal);
+  }
+  function sleepStats(today, days) {
+    var hs = [];
+    for (var i = 0; i < days; i++) { var e = getSleep(addDays(today, -i)); if (e && e.h) hs.push(e.h); }
+    if (!hs.length) return null;
+    return { n:hs.length, mean:hs.reduce(function (a, b) { return a + b; }, 0) / hs.length, min:Math.min.apply(null, hs) };
+  }
+  var SLEEP_PHASE = {
+    base:  "En bloc de base, l'objectif est la régularité : même heure de coucher et de lever à ±30 min, week-end compris. C'est la période idéale pour installer une routine.",
+    build: "Le volume monte : le besoin de sommeil aussi. Vise le haut de la fourchette (8–9 h) et ajoute une sieste de 20 min les jours de double contrainte (travail + séance dure).",
+    spec:  "Bloc spécifique : la récupération fait la différence. Deux nuits courtes d'affilée avant une simulation, et la séance perd sa valeur — décale-la plutôt d'un jour.",
+    taper: "Semaine de course : « banque » du sommeil de J−7 à J−2 (30–60 min de plus que d'habitude). La nuit d'avant-course est souvent médiocre, c'est normal et sans effet sur la performance si les précédentes ont été bonnes."
+  };
+  function sleepAdvice(cfg, plan, today) {
+    var tomorrow = addDays(today, 1);
+    var all = []; plan.weeks.forEach(function (w) { w.sessions.forEach(function (x) { all.push(x); }); });
+    var next = all.filter(function (x) { return sameDay(x.date, tomorrow); })[0];
+    var todayS = all.filter(function (x) { return sameDay(x.date, today); })[0];
+    var week = plan.weeks.filter(function (w) { return today >= w.start && today <= w.end; })[0];
+    var tonight = [];
+    if (next && next.race) {
+      tonight.push("Demain c'est la course : dîner connu et léger, affaires prêtes, réveil réglé avec 30 min de marge. Couche-toi à l'heure habituelle, pas plus tôt — s'endormir forcé ne marche pas.");
+      tonight.push("Si tu dors mal, ne t'inquiète pas : c'est la banque de sommeil des nuits précédentes qui compte.");
+    } else if (next && (next.type === "qrun" || next.type === "hyrox" || next.type === "stations")) {
+      tonight.push("Séance dure demain (" + next.title + ") : vise 8 h de sommeil, dernier café avant 14 h, écrans éteints 45 min avant le coucher.");
+    } else if (next) {
+      tonight.push("Séance modérée demain (" + next.title + ") : routine habituelle, 7–9 h de sommeil.");
+    } else {
+      tonight.push("Repos demain : profite-en pour rattraper une éventuelle dette, sans décaler le lever de plus d'une heure (le rythme compte plus que la durée brute).");
+    }
+    if (todayS && (todayS.type === "qrun" || todayS.type === "hyrox" || todayS.type === "stations")) {
+      tonight.push("Après ta séance intense d'aujourd'hui : dîner riche en glucides et protéines au moins 2 h avant le coucher, douche tiède, lumière tamisée — l'adrénaline met 2 à 3 h à redescendre.");
+    }
+    var routine = [
+      "Chambre fraîche (18–19 °C), sombre et silencieuse ; le téléphone hors de la chambre ou en mode avion.",
+      "Caféine : dernier café 8 h avant le coucher ; alcool : il fragmente le sommeil profond même en petite quantité.",
+      "Sieste : 20 min maximum, avant 15 h, si nuit courte ou double journée.",
+      "Un réveil nocturne prolongé : lève-toi, lumière faible, activité calme, retour au lit à la somnolence — ne regarde pas l'heure."
+    ];
+    var phase = week ? SLEEP_PHASE[week.race ? "taper" : week.phase] : SLEEP_PHASE.base;
+    if (week && week.deload && !week.race) phase = "Semaine de décharge : c'est le moment de rembourser la dette de sommeil des semaines précédentes. Grasse matinée autorisée, dans la limite d'une heure de décalage.";
+    return { tonight:tonight, routine:routine, phase:phase };
+  }
+
+  function renderSleep(cfg, plan, today) {
+    var A = sleepAdvice(cfg, plan, today);
+    var st = sleepStats(today, 7);
+    var last = getSleep(today) || {};
+    document.getElementById("sleep-note").textContent = st ? "Moyenne 7 nuits : " + fr(st.mean) + " h" + (st.mean < 7 ? " — en dessous des 7–9 h recommandées" : "") : "Cible : 7–9 h par nuit, 8–10 h en période de gros volume.";
+    function qb(v, label) { return '<button type="button" data-q="' + v + '" class="' + (last.q === v ? "on" : "") + '">' + label + "</button>"; }
+    document.getElementById("sleep-card").innerHTML =
+      '<div class="sleep-log">' +
+        '<div><div class="lbl">Nuit dernière <span class="rpe-read" id="sleep-read">' + (last.h ? fr(last.h) + " h" : "—") + "</span></div>" +
+        '<input type="range" id="sleep-h" min="3" max="11" step="0.5" value="' + (last.h || 7.5) + '" aria-label="Heures de sommeil"></div>' +
+        '<div><div class="lbl">Qualité</div><div class="qual">' + qb(1, "Mauvaise") + qb(2, "Moyenne") + qb(3, "Bonne") + "</div></div>" +
+        '<div class="sleep-stat">' + (st ? "7 derniers jours : moyenne <b>" + fr(st.mean) + " h</b> sur " + st.n + " nuit" + (st.n > 1 ? "s" : "") + ", minimum " + fr(st.min) + " h" : "Note tes nuits : le plan tient compte des nuits courtes.") + "</div>" +
+      "</div>" +
+      '<div class="nutri-steps">' +
+        '<div class="nutri-step"><div class="t">Ce soir</div><ul>' + A.tonight.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul></div>" +
+        '<div class="nutri-step"><div class="t">Cette phase</div><ul><li>' + esc(A.phase) + "</li></ul></div>" +
+        '<div class="nutri-step"><div class="t">Les bases</div><ul>' + A.routine.map(function (l) { return "<li>" + esc(l) + "</li>"; }).join("") + "</ul></div>" +
+      "</div>" +
+      '<p class="nutri-foot">Repères pour adultes en bonne santé. Insomnie persistante (plus de 3 semaines), ronflements avec pauses respiratoires, somnolence diurne marquée : consulte un médecin.</p>';
+  }
+
+  document.getElementById("sleep-card").addEventListener("input", function (e) {
+    if (e.target.id !== "sleep-h") return;
+    var v = parseFloat(e.target.value);
+    setSleep(state.cfg.today, { h:v });
+    document.getElementById("sleep-read").textContent = fr(v) + " h";
+  });
+  document.getElementById("sleep-card").addEventListener("change", function (e) { if (e.target.id === "sleep-h") render(); });
+  document.getElementById("sleep-card").addEventListener("click", function (e) {
+    var b = e.target.closest(".qual button");
+    if (!b) return;
+    var q = parseInt(b.dataset.q, 10), cur = getSleep(state.cfg.today) || {};
+    setSleep(state.cfg.today, { q: cur.q === q ? null : q });
+    render();
+  });
+
   function renderWeeks(cfg, plan, today) {
     el.planNote.textContent = cfg.freq + " séances par semaine · " + LEVELS[cfg.level].label +
       " · " + WEAK_LABEL[cfg.weak].toLowerCase();
@@ -2101,6 +2219,7 @@
     renderWeeks(cfg, plan, cfg.today);
     renderStations(cfg, R);
     renderNutrition(cfg, R, plan, cfg.today);
+    renderSleep(cfg, plan, cfg.today);
   }
 
   /* ============ interactions du journal ============ */
